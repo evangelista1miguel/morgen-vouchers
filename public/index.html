@@ -1,13 +1,453 @@
-
-☕ morgen vouchers
-Member
-Staff
-Admin
-MORGEN COFFEE GROUP · VOUCHER PROGRAM
-Save on every cup you love.
-Enter your voucher code to view your discount and show it at the counter.
-View your voucher
-Enter the code printed on your voucher card. Show it to your barista at either Morgen branch.
-
-Look up
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morgen Voucher System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+  :root {
+    --brown:#3B2314;--mid:#5C3A21;--warm:#8B5E3C;--gold:#C9962A;
+    --cream:#F5EFE6;--paper:#FAF7F3;--offwhite:#FFFDF9;--muted:#9C8B7A;
+    --green:#2E7D52;--red:#B03A2E;--border:#E0D5C8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--brown);min-height:100vh;}
+  nav{background:var(--offwhite);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+  .nav-brand{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--brown);}
+  .nav-brand span{color:var(--gold);font-style:italic;}
+  .nav-tabs{display:flex;background:var(--cream);border-radius:6px;padding:3px;}
+  .nav-tab{padding:5px 14px;font-size:.78rem;font-weight:500;border:none;background:transparent;color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;}
+  .nav-tab.active{background:var(--brown);color:var(--cream);}
+  .page{display:none;}.page.active{display:block;}
+  .hero{background:var(--brown);color:var(--cream);padding:3.5rem 2rem 3rem;text-align:center;}
+  .eyebrow{font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:.85rem;}
+  .hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,5vw,3rem);line-height:1.15;font-weight:400;margin-bottom:.65rem;}
+  .hero h1 em{font-style:italic;color:var(--gold);}
+  .hero-sub{font-size:.88rem;color:#C8BFB5;font-weight:300;max-width:400px;margin:0 auto;line-height:1.65;}
+  .wrap{max-width:520px;margin:0 auto;padding:1.5rem 1.25rem 3rem;}
+  .card{background:var(--offwhite);border:1px solid var(--border);border-radius:14px;padding:1.75rem;box-shadow:0 3px 18px rgba(59,35,20,.07);}
+  .card+.card,.card+.vc{margin-top:1rem;}
+  .card h2{font-family:'Playfair Display',serif;font-size:1.35rem;margin-bottom:.3rem;}
+  .card p{font-size:.82rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.6;}
+  label{display:block;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;}
+  input,select{width:100%;padding:.72rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.92rem;color:var(--brown);background:var(--paper);margin-bottom:1rem;transition:border-color .15s;outline:none;}
+  input:focus,select:focus{border-color:var(--warm);}
+  .btn{width:100%;padding:.82rem;background:var(--brown);color:var(--cream);border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .15s;margin-top:.1rem;}
+  .btn:hover{background:var(--mid);}
+  .btn-sm{width:auto;padding:.68rem 1.1rem;font-size:.8rem;margin-top:0;}
+  .btn-outline{background:transparent;color:var(--brown);border:1.5px solid var(--border);margin-top:.5rem;}
+  .row{display:flex;gap:.5rem;align-items:flex-start;}
+  .row input{margin-bottom:0;flex:1;}
+  .result{margin-top:1rem;border-radius:10px;padding:1.2rem;display:none;}
+  .result.ok{background:#EBF5EE;border:1.5px solid #A8D5B5;}
+  .result.err{background:#FAEAEA;border:1.5px solid #E8B4B0;}
+  .result.warn{background:#FEF9EC;border:1.5px solid #E8D48A;}
+  .ri{font-size:1.5rem;margin-bottom:.4rem;}
+  .rt{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:.3rem;}
+  .rd{font-size:.8rem;color:var(--muted);line-height:1.6;}
+  .ra{font-size:1.4rem;font-family:'Playfair Display',serif;font-weight:700;color:var(--green);margin-top:.4rem;}
+  /* voucher card */
+  .vc{background:var(--offwhite);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:1rem;display:none;}
+  .vc-row{display:flex;}
+  .vc-bar{width:7px;flex-shrink:0;}
+  .b50{background:var(--gold);}.b20{background:var(--warm);}
+  .vc-body{flex:1;padding:1.35rem;}
+  .vc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px dashed var(--border);}
+  .vc-brand{font-family:'Playfair Display',serif;font-size:.95rem;}
+  .vc-brand small{display:block;font-family:'Inter',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+  .vc-amt{text-align:right;}
+  .vc-amt-v{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;line-height:1;}
+  .vc-amt-l{font-size:.62rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+  .pills{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+  .pill{background:var(--cream);border-radius:999px;padding:3px 10px;font-size:.68rem;font-weight:500;color:var(--mid);}
+  .code-box{background:var(--cream);border:1.5px dashed var(--warm);border-radius:8px;padding:.85rem 1rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+  .code-lbl{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem;}
+  .code-val{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;letter-spacing:.06em;}
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .dot-ok{background:var(--green);}.dot-used{background:var(--red);}
+  .vc-foot{font-size:.67rem;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:.85rem;}
+  /* admin */
+  .admin-wrap{max-width:820px;margin:0 auto;padding:2.5rem 1.5rem 4rem;}
+  .admin-head{margin-bottom:2rem;}
+  .admin-head h2{font-family:'Playfair Display',serif;font-size:1.7rem;margin-bottom:.2rem;}
+  .admin-head p{font-size:.82rem;color:var(--muted);}
+  .key-bar{background:var(--cream);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+  .key-bar label{margin-bottom:0;white-space:nowrap;}
+  .key-bar input{margin-bottom:0;flex:1;min-width:160px;}
+  .tier-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;}
+  .tc{background:var(--offwhite);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .tc-head{padding:1rem 1.25rem .75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.65rem;}
+  .tc-dot{width:10px;height:10px;border-radius:50%;}
+  .tc-dot-50{background:var(--gold);}.tc-dot-20{background:var(--warm);}
+  .tc-head h3{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;}
+  .tc-stats{padding:1rem 1.25rem;display:flex;flex-direction:column;gap:.55rem;}
+  .tr{display:flex;justify-content:space-between;font-size:.8rem;}
+  .tr span:first-child{color:var(--muted);}
+  .tr span:last-child{font-weight:600;}
+  .pb-wrap{background:var(--cream);border-radius:999px;height:6px;margin:.2rem 0 0;overflow:hidden;}
+  .pb{height:100%;border-radius:999px;transition:width .4s;}
+  .pb-g{background:var(--gold);}.pb-w{background:var(--warm);}
+  .sec{font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.85rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);}
+  .gen-card{background:var(--offwhite);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin-bottom:2rem;}
+  .gen-card p{font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.5;}
+  .gen-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 0;border-bottom:1px solid var(--border);gap:1rem;flex-wrap:wrap;}
+  .gen-row:last-of-type{border-bottom:none;padding-bottom:0;}
+  .gi{flex:1;min-width:180px;}
+  .gn{font-weight:600;font-size:.88rem;margin-bottom:.15rem;}
+  .gs{font-size:.75rem;color:var(--muted);}
+  .ga{display:flex;align-items:center;gap:.5rem;flex-shrink:0;}
+  .ga span{font-size:.78rem;color:var(--muted);white-space:nowrap;}
+  .log-card{background:var(--offwhite);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem;}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;}
+  th{background:var(--cream);padding:.65rem 1rem;text-align:left;font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+  td{padding:.75rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:var(--cream);}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.65rem;font-weight:600;}
+  .bg50{background:#FEF3E2;color:var(--gold);}
+  .bg20{background:#F0EAE2;color:var(--warm);}
+  .bgdau{background:#E8F0FB;color:#2B5AAD;}
+  .bgkape{background:#EDF5EE;color:var(--green);}
+  .empty{text-align:center;padding:3rem 2rem;color:var(--muted);font-size:.82rem;}
+  .empty-icon{font-size:2rem;margin-bottom:.65rem;}
+  .divider{height:1px;background:var(--border);margin:1.75rem 0;}
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);background:var(--brown);color:var(--cream);padding:.7rem 1.4rem;border-radius:8px;font-size:.8rem;font-weight:500;opacity:0;transition:all .25s;z-index:999;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media(max-width:520px){nav{padding:0 1rem;}.nav-tab{padding:5px 9px;font-size:.7rem;}.tier-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+ 
+<nav>
+  <span class="nav-brand">☕ morgen <span>vouchers</span></span>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('member',this)">Member</button>
+    <button class="nav-tab" onclick="showPage('staff',this)">Staff</button>
+    <button class="nav-tab" onclick="showPage('admin',this)">Admin</button>
+  </div>
+</nav>
+ 
+<!-- MEMBER -->
+<div class="page active" id="page-member">
+  <div class="hero">
+    <div class="eyebrow">Morgen Coffee Group · Voucher Program</div>
+    <h1>Save on every<br><em>cup you love.</em></h1>
+    <p class="hero-sub">Enter your voucher code to view your discount and show it at the counter.</p>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <h2>View your voucher</h2>
+      <p>Enter the code printed on your voucher card. Show it to your barista at either Morgen branch.</p>
+      <div class="row">
+        <input type="text" id="m-code" placeholder="e.g. MCG50-2026-001" oninput="this.value=this.value.toUpperCase()">
+        <button class="btn btn-sm" onclick="memberLookup()">Look up</button>
+      </div>
+      <div id="m-result" class="result"></div>
+    </div>
+ 
+    <div class="vc" id="vc-50">
+      <div class="vc-row">
+        <div class="vc-bar b50"></div>
+        <div class="vc-body">
+          <div class="vc-top">
+            <div class="vc-brand">morgen kaffee<small>& kapebaluan</small></div>
+            <div class="vc-amt"><div class="vc-amt-v">₱50</div><div class="vc-amt-l">off your order</div></div>
+          </div>
+          <div class="pills"><span class="pill">Min. order ₱300</span><span class="pill">Both branches</span><span class="pill">AY 2026–2027</span></div>
+          <div class="code-box">
+            <div><div class="code-lbl">Control No.</div><div class="code-val" id="vc50-code">—</div></div>
+            <div class="dot" id="vc50-dot"></div>
+          </div>
+          <div class="vc-foot">Present this code + voucher card at the counter. Min. order ₱300. Not combinable with other promos. One redemption per voucher. Valid AY 2026–2027.</div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="vc" id="vc-20">
+      <div class="vc-row">
+        <div class="vc-bar b20"></div>
+        <div class="vc-body">
+          <div class="vc-top">
+            <div class="vc-brand">morgen kaffee<small>& kapebaluan</small></div>
+            <div class="vc-amt"><div class="vc-amt-v">₱20</div><div class="vc-amt-l">off your order</div></div>
+          </div>
+          <div class="pills"><span class="pill">Min. order ₱230</span><span class="pill">Both branches</span><span class="pill">AY 2026–2027</span></div>
+          <div class="code-box">
+            <div><div class="code-lbl">Control No.</div><div class="code-val" id="vc20-code">—</div></div>
+            <div class="dot" id="vc20-dot"></div>
+          </div>
+          <div class="vc-foot">Present this code + voucher card at the counter. Min. order ₱230. Not combinable with other promos. One redemption per voucher. Valid AY 2026–2027.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- STAFF -->
+<div class="page" id="page-staff">
+  <div class="hero">
+    <div class="eyebrow">Staff Tool · Morgen Coffee Group</div>
+    <h1>Validate &<br><em>apply voucher.</em></h1>
+    <p class="hero-sub">Enter the customer's code, select branch, and enter the order amount.</p>
+  </div>
+  <div class="wrap" style="margin-top:1.75rem;">
+    <div class="card">
+      <label>Voucher code</label>
+      <input type="text" id="s-code" placeholder="MCG50-2026-001 or MCG20-2026-001" style="text-transform:uppercase;font-weight:600;letter-spacing:.05em;" oninput="this.value=this.value.toUpperCase()">
+      <label>Branch</label>
+      <select id="s-branch">
+        <option value="">Select branch</option>
+        <option value="Morgen Dau">Morgen Dau</option>
+        <option value="Kapebaluan by Morgen Angeles">Kapebaluan by Morgen Angeles</option>
+      </select>
+      <label>Order amount (₱)</label>
+      <input type="number" id="s-amount" placeholder="e.g. 350" min="1" step="0.01">
+      <button class="btn" onclick="staffRedeem()">Validate & apply discount</button>
+      <div id="s-result" class="result"></div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ADMIN -->
+<div class="page" id="page-admin">
+  <div class="admin-wrap">
+    <div class="admin-head">
+      <h2>Voucher dashboard</h2>
+      <p>Morgen Coffee Group · AY 2026–2027</p>
+    </div>
+ 
+    <div class="key-bar">
+      <label>Admin key</label>
+      <input type="password" id="a-key" placeholder="Enter admin key" style="margin-bottom:0;">
+      <button class="btn btn-sm" onclick="loadAdmin()">Load dashboard</button>
+    </div>
+ 
+    <div class="tier-grid" id="tier-grid">
+      <div class="tc"><div class="tc-head"><div class="tc-dot tc-dot-50"></div><h3>₱50 off voucher</h3></div><div class="tc-stats"><div class="tr"><span>Load data to view</span><span>—</span></div></div></div>
+      <div class="tc"><div class="tc-head"><div class="tc-dot tc-dot-20"></div><h3>₱20 off voucher</h3></div><div class="tc-stats"><div class="tr"><span>Load data to view</span><span>—</span></div></div></div>
+    </div>
+ 
+    <div class="divider"></div>
+    <div class="sec">Generate voucher codes</div>
+    <div class="gen-card">
+      <p>Generate all codes for each tier at once. Locked to batch limits — 50 pcs for ₱50, 150 pcs for ₱20.</p>
+      <div class="gen-row">
+        <div class="gi"><div class="gn">₱50 off voucher</div><div class="gs">MCG50-2026 · Min. ₱300 · 50 pcs max</div></div>
+        <div class="ga"><span id="rem-50">—</span><button class="btn btn-sm" onclick="generateBatch('50')">Generate</button></div>
+      </div>
+      <div class="gen-row">
+        <div class="gi"><div class="gn">₱20 off voucher</div><div class="gs">MCG20-2026 · Min. ₱230 · 150 pcs max</div></div>
+        <div class="ga"><span id="rem-20">—</span><button class="btn btn-sm" onclick="generateBatch('20')">Generate</button></div>
+      </div>
+      <div id="gen-msg" style="margin-top:.85rem;font-size:.78rem;color:var(--muted);display:none;"></div>
+    </div>
+ 
+    <div class="sec">Redemption log</div>
+    <div class="log-card" id="log-card">
+      <div class="empty"><div class="empty-icon">☕</div>Enter your admin key and click Load dashboard.</div>
+    </div>
+    <button class="btn btn-outline" style="margin-top:.75rem;" onclick="exportCSV()">Export log as CSV</button>
+  </div>
+</div>
+ 
+<div class="toast" id="toast"></div>
+ 
+<script>
+// ── CONFIG ───────────────────────────────────────────────────
+// This file is served by the same Express server, so we use
+// relative paths — no need to hardcode a URL.
+const BASE = '';
+ 
+let adminLog = [];
+ 
+// ── NAV ──────────────────────────────────────────────────────
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+ 
+// ── MEMBER ───────────────────────────────────────────────────
+async function memberLookup() {
+  const code = document.getElementById('m-code').value.trim().toUpperCase();
+  const res  = document.getElementById('m-result');
+  document.getElementById('vc-50').style.display = 'none';
+  document.getElementById('vc-20').style.display = 'none';
+ 
+  if (!code) { showToast('Enter a voucher code.'); return; }
+ 
+  try {
+    const r = await fetch(`${BASE}/vouchers/check/${encodeURIComponent(code)}`);
+    const d = await r.json();
+ 
+    if (!d.valid && d.reason === 'not_found') {
+      show(res,'err','❌','Code not found','Check the code on your voucher card and try again.'); return;
+    }
+    if (d.status === 'used') {
+      show(res,'err','⚠️','Already redeemed',`This voucher was used on ${d.date} at ${d.branch}. Each voucher is one-time use.`); return;
+    }
+ 
+    show(res,'ok','✅','Voucher is valid',`Show this to your barista. Min. order ₱${d.minOrder}. Not combinable with other promos.`);
+ 
+    if (d.tier === '50') {
+      document.getElementById('vc50-code').textContent = code;
+      document.getElementById('vc50-dot').className = 'dot dot-ok';
+      document.getElementById('vc-50').style.display = 'block';
+    } else {
+      document.getElementById('vc20-code').textContent = code;
+      document.getElementById('vc20-dot').className = 'dot dot-ok';
+      document.getElementById('vc-20').style.display = 'block';
+    }
+  } catch(e) { show(res,'err','⚠️','Connection error','Could not reach the server. Check your internet.'); }
+}
+ 
+// ── STAFF ────────────────────────────────────────────────────
+async function staffRedeem() {
+  const code   = document.getElementById('s-code').value.trim().toUpperCase();
+  const branch = document.getElementById('s-branch').value;
+  const amount = parseFloat(document.getElementById('s-amount').value);
+  const res    = document.getElementById('s-result');
+ 
+  if (!code)             { showToast('Enter a voucher code.'); return; }
+  if (!branch)           { showToast('Select a branch.'); return; }
+  if (!amount||amount<1) { showToast('Enter a valid order amount.'); return; }
+ 
+  try {
+    const r = await fetch(`${BASE}/vouchers/redeem`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ code, branch, amount })
+    });
+    const d = await r.json();
+ 
+    if (d.ok) {
+      res.className = 'result ok'; res.style.display = 'block';
+      res.innerHTML = `<div class="ri">✅</div><div class="rt">Discount applied!</div>
+        <div class="rd">${code} · ₱${d.tier} off · ${branch}<br>${d.date} ${d.time}</div>
+        <div class="ra">−₱${d.discount.toFixed(2)}</div>
+        <div class="rd" style="margin-top:.3rem;">₱${parseFloat(amount).toFixed(2)} → <strong>₱${d.final.toFixed(2)}</strong> after discount</div>`;
+      document.getElementById('s-code').value = '';
+      document.getElementById('s-branch').value = '';
+      document.getElementById('s-amount').value = '';
+      showToast('Redemption logged ✓');
+    } else {
+      const m = {
+        invalid_code:  ['err','❌','Invalid code','This code doesn\'t exist in the system. Do not apply the discount.'],
+        already_used:  ['err','⛔','Already redeemed',`Used on ${d.date} at ${d.branch}. Do not apply.`],
+        below_minimum: ['warn','⚠️','Minimum not met',`Requires min. ₱${d.minOrder}. Current: ₱${amount.toFixed(2)}. Do not apply.`],
+      }[d.reason] || ['err','❌','Error','Something went wrong.'];
+      show(res, m[0], m[1], m[2], m[3]);
+    }
+  } catch(e) { show(res,'err','⚠️','Connection error','Could not reach the server.'); }
+}
+ 
+// ── ADMIN ────────────────────────────────────────────────────
+async function loadAdmin() {
+  const key = document.getElementById('a-key').value.trim();
+  if (!key) { showToast('Enter the admin key.'); return; }
+ 
+  try {
+    const r = await fetch(`${BASE}/vouchers/summary`, { headers:{'x-admin-key': key} });
+    if (r.status === 403) { showToast('Wrong admin key.'); return; }
+    const d = await r.json();
+    adminLog = d.log || [];
+    renderTierCards(d.summary);
+    renderLog(d.log);
+    updateRemaining(d.summary);
+    showToast('Dashboard loaded ✓');
+  } catch(e) { showToast('Connection error.'); }
+}
+ 
+function renderTierCards(summary) {
+  const LIMITS = {'50':50,'20':150};
+  let html = '';
+  for (const [key, s] of Object.entries(summary)) {
+    const pct   = s.issued > 0 ? Math.round(s.redeemed/s.issued*100) : 0;
+    const dotCls = key==='50' ? 'tc-dot-50' : 'tc-dot-20';
+    const pbCls  = key==='50' ? 'pb-g' : 'pb-w';
+    html += `<div class="tc">
+      <div class="tc-head"><div class="tc-dot ${dotCls}"></div><h3>₱${key} off voucher</h3></div>
+      <div class="tc-stats">
+        <div class="tr"><span>Issued</span><span>${s.issued} / ${LIMITS[key]}</span></div>
+        <div class="tr"><span>Redeemed</span><span>${s.redeemed}</span></div>
+        <div class="tr"><span>Available</span><span>${s.available}</span></div>
+        <div class="tr"><span>Total discount given</span><span>₱${s.totalDiscount.toFixed(2)}</span></div>
+        <div class="pb-wrap"><div class="pb ${pbCls}" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('tier-grid').innerHTML = html;
+}
+ 
+function updateRemaining(summary) {
+  const LIMITS = {'50':50,'20':150};
+  for (const [key,s] of Object.entries(summary)) {
+    const el = document.getElementById(`rem-${key}`);
+    if (el) el.textContent = `${LIMITS[key]-s.issued} remaining`;
+  }
+}
+ 
+function renderLog(log) {
+  const card = document.getElementById('log-card');
+  if (!log||log.length===0) {
+    card.innerHTML=`<div class="empty"><div class="empty-icon">☕</div>No redemptions yet.</div>`; return;
+  }
+  let rows = `<table><thead><tr><th>Control No.</th><th>Tier</th><th>Date</th><th>Branch</th><th>Order (₱)</th><th>Discount (₱)</th></tr></thead><tbody>`;
+  log.forEach(r => {
+    const tb = r.tier==='50'?'<span class="badge bg50">₱50 off</span>':'<span class="badge bg20">₱20 off</span>';
+    const bb = r.branch==='Morgen Dau'?'<span class="badge bgdau">Morgen Dau</span>':'<span class="badge bgkape">Kapebaluan</span>';
+    const disc = r.tier==='50'?50:20;
+    rows+=`<tr><td><strong>${r.code}</strong></td><td>${tb}</td><td>${r.date_redeemed} <span style="color:var(--muted);font-size:.72rem">${r.time_redeemed}</span></td><td>${bb}</td><td>₱${parseFloat(r.order_amount).toFixed(2)}</td><td style="color:var(--green);font-weight:600;">−₱${disc}.00</td></tr>`;
+  });
+  card.innerHTML = rows+'</tbody></table>';
+}
+ 
+async function generateBatch(tier) {
+  const key = document.getElementById('a-key').value.trim();
+  if (!key) { showToast('Enter the admin key first.'); return; }
+  try {
+    const r = await fetch(`${BASE}/vouchers/generate`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ tier, adminKey: key })
+    });
+    const d = await r.json();
+    const msg = document.getElementById('gen-msg');
+    msg.style.display = 'block';
+    if (d.ok && d.created>0) {
+      msg.textContent = `✓ Generated ${d.created} codes: ${d.from} → ${d.to}`;
+      showToast(`${d.created} codes generated`);
+      loadAdmin();
+    } else {
+      msg.textContent = d.message || 'Batch limit already reached.';
+    }
+  } catch(e) { showToast('Connection error.'); }
+}
+ 
+function exportCSV() {
+  if (!adminLog.length) { showToast('Load admin data first.'); return; }
+  let csv = 'Control No.,Tier,Date,Time,Branch,Order Amount (PHP),Discount (PHP)\n';
+  adminLog.forEach(r => {
+    const disc = r.tier==='50'?50:20;
+    csv+=`${r.code},₱${r.tier} off,${r.date_redeemed},${r.time_redeemed},"${r.branch}",${r.order_amount},${disc}\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='Morgen_Voucher_Log.csv'; a.click();
+  showToast('CSV exported');
+}
+ 
+// ── HELPERS ──────────────────────────────────────────────────
+function show(el, cls, icon, title, detail) {
+  el.className = `result ${cls}`; el.style.display = 'block';
+  el.innerHTML = `<div class="ri">${icon}</div><div class="rt">${title}</div><div class="rd">${detail}</div>`;
+}
+ 
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+</script>
+</body>
+</html>

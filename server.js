@@ -13,38 +13,35 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ── IN-MEMORY STORE (persists while server is running) ───────
-// On free Render, the server sleeps after inactivity but data
-// survives as long as it's awake. For a voucher system used
-// daily at the counter this is perfectly fine.
+// ── STORE ────────────────────────────────────────────────────
 const store = {
-  vouchers: {},   // code -> { tier, status, branch, date, time, amount }
+  vouchers: {},   // code -> { tier, prefix, discount, minOrder, status, branch, date, time, amount }
+  tiers: {},      // tierKey -> { prefix, discount, minOrder, limit, label }
   log: []
 };
 
-// ── CONFIG ───────────────────────────────────────────────────
-const TIERS = {
-  '50': { prefix: 'MCG50-2026', discount: 50,  minOrder: 300, limit: 50  },
-  '20': { prefix: 'MCG20-2026', discount: 20,  minOrder: 230, limit: 150 }
-};
+// ── DEFAULT TIERS ────────────────────────────────────────────
+store.tiers['50'] = { prefix: 'MCG50-2026', discount: 50,  minOrder: 300, limit: 50,  label: '₱50 off' };
+store.tiers['20'] = { prefix: 'MCG20-2026', discount: 20,  minOrder: 230, limit: 150, label: '₱20 off' };
 
+// ── ADMIN KEY ────────────────────────────────────────────────
 const ADMIN_KEY = process.env.VOUCHER_ADMIN_KEY || 'morgen-admin-2026';
 
 // ── HELPERS ──────────────────────────────────────────────────
-function getTierFromCode(code) {
-  for (const [key, t] of Object.entries(TIERS)) {
-    if (code.startsWith(t.prefix)) return key;
-  }
-  return null;
-}
-
 function randomCode(length = 5) {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I to avoid confusion
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let result = '';
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
+}
+
+function getTierFromCode(code) {
+  for (const [key, t] of Object.entries(store.tiers)) {
+    if (code.startsWith(t.prefix + '-')) return key;
+  }
+  return null;
 }
 
 function nowPH() {
@@ -57,10 +54,7 @@ function nowPH() {
 
 function authAdmin(req, res) {
   const key = req.headers['x-admin-key'] || req.body?.adminKey || req.query?.adminKey;
-  if (key !== ADMIN_KEY) {
-    res.status(403).json({ ok: false, reason: 'unauthorized' });
-    return false;
-  }
+  if (key !== ADMIN_KEY) { res.status(403).json({ ok: false, reason: 'unauthorized' }); return false; }
   return true;
 }
 
@@ -68,26 +62,25 @@ function authAdmin(req, res) {
 
 app.get('/health', (req, res) => res.json({ ok: true, service: 'morgen-vouchers' }));
 
-// Member: check a code
+// Member: check code
 app.get('/vouchers/check/:code', (req, res) => {
   const code = req.params.code.toUpperCase().trim();
   const v    = store.vouchers[code];
-
   if (!v) return res.json({ valid: false, reason: 'not_found' });
-
-  const tier = TIERS[v.tier];
+  const t = store.tiers[v.tier];
   res.json({
     valid:    v.status === 'unused',
     status:   v.status,
     tier:     v.tier,
-    discount: tier.discount,
-    minOrder: tier.minOrder,
+    label:    t.label,
+    discount: t.discount,
+    minOrder: t.minOrder,
     branch:   v.branch || null,
     date:     v.date   || null,
   });
 });
 
-// Staff: redeem a code
+// Staff: redeem
 app.post('/vouchers/redeem', (req, res) => {
   const code   = (req.body.code   || '').toUpperCase().trim();
   const branch = (req.body.branch || '').trim();
@@ -103,26 +96,51 @@ app.post('/vouchers/redeem', (req, res) => {
   if (!tierKey || !v)      return res.json({ ok: false, reason: 'invalid_code' });
   if (v.status === 'used') return res.json({ ok: false, reason: 'already_used', branch: v.branch, date: v.date });
 
-  const tier = TIERS[tierKey];
-  if (amount < tier.minOrder) {
-    return res.json({ ok: false, reason: 'below_minimum', minOrder: tier.minOrder, discount: tier.discount });
+  const t = store.tiers[tierKey];
+  if (amount < t.minOrder) {
+    return res.json({ ok: false, reason: 'below_minimum', minOrder: t.minOrder, discount: t.discount });
   }
 
   const { date, time } = nowPH();
   store.vouchers[code] = { ...v, status: 'used', branch, date, time, amount };
-  store.log.unshift({ code, tier: tierKey, discount: tier.discount, branch, date, time, amount });
+  store.log.unshift({ code, tier: tierKey, label: t.label, discount: t.discount, branch, date, time, amount });
 
-  res.json({ ok: true, code, tier: tierKey, discount: tier.discount, final: +(amount - tier.discount).toFixed(2), branch, date, time });
+  res.json({ ok: true, code, tier: tierKey, label: t.label, discount: t.discount, final: +(amount - t.discount).toFixed(2), branch, date, time });
 });
 
-// Admin: generate batch
+// Admin: add a new tier / voucher batch
+app.post('/vouchers/tiers', (req, res) => {
+  if (!authAdmin(req, res)) return;
+
+  const { prefix, discount, minOrder, limit } = req.body;
+
+  if (!prefix || !discount || !minOrder || !limit)
+    return res.status(400).json({ ok: false, reason: 'missing_fields' });
+
+  const cleanPrefix = prefix.toUpperCase().trim();
+  const disc  = parseInt(discount);
+  const minOrd = parseInt(minOrder);
+  const lim   = parseInt(limit);
+
+  if (isNaN(disc) || disc < 1)   return res.status(400).json({ ok: false, reason: 'invalid_discount' });
+  if (isNaN(minOrd) || minOrd < 1) return res.status(400).json({ ok: false, reason: 'invalid_min_order' });
+  if (isNaN(lim) || lim < 1 || lim > 500) return res.status(400).json({ ok: false, reason: 'invalid_limit' });
+
+  // Use discount amount as tier key, append timestamp if already exists
+  const tierKey = `${disc}_${Date.now()}`;
+  store.tiers[tierKey] = { prefix: cleanPrefix, discount: disc, minOrder: minOrd, limit: lim, label: `₱${disc} off` };
+
+  res.json({ ok: true, tierKey, tier: store.tiers[tierKey] });
+});
+
+// Admin: generate batch for a tier
 app.post('/vouchers/generate', (req, res) => {
   if (!authAdmin(req, res)) return;
 
   const { tier } = req.body;
-  if (!TIERS[tier]) return res.status(400).json({ ok: false, reason: 'invalid_tier' });
+  if (!store.tiers[tier]) return res.status(400).json({ ok: false, reason: 'invalid_tier' });
 
-  const t        = TIERS[tier];
+  const t        = store.tiers[tier];
   const existing = Object.values(store.vouchers).filter(v => v.tier === tier).length;
   const toCreate = t.limit - existing;
 
@@ -143,17 +161,24 @@ app.post('/vouchers/generate', (req, res) => {
   res.json({ ok: true, created: codes.length, sample: codes.slice(0, 3) });
 });
 
+// Admin: get all tiers
+app.get('/vouchers/tiers', (req, res) => {
+  if (!authAdmin(req, res)) return;
+  res.json({ ok: true, tiers: store.tiers });
+});
+
 // Admin: summary + log
 app.get('/vouchers/summary', (req, res) => {
   if (!authAdmin(req, res)) return;
 
   const summary = {};
-  for (const [key, t] of Object.entries(TIERS)) {
+  for (const [key, t] of Object.entries(store.tiers)) {
     const all  = Object.values(store.vouchers).filter(v => v.tier === key);
     const used = all.filter(v => v.status === 'used');
     summary[key] = {
-      tier: key, discount: t.discount, minOrder: t.minOrder, limit: t.limit,
-      issued: all.length, redeemed: used.length, available: all.length - used.length,
+      tier: key, label: t.label, discount: t.discount, minOrder: t.minOrder,
+      limit: t.limit, issued: all.length, redeemed: used.length,
+      available: all.length - used.length,
       totalDiscount: used.length * t.discount,
     };
   }

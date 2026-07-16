@@ -29,761 +29,193 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--offwhite); color: var(--body); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--offwhite);
-  color: var(--body);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── NAV ── */
-nav {
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2rem;
-  height: 62px;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-}
-
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-}
-
+/* NAV */
+nav { position: sticky; top: 0; z-index: 200; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 62px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
+.nav-brand { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
 .nav-logo { font-size: 1.5rem; line-height: 1; }
-
-.nav-wordmark {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -0.01em;
-}
-
+.nav-wordmark { font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--text); }
 .nav-wordmark span { color: var(--teal); }
-
-.nav-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--grey);
-  border-radius: 999px;
-  padding: 4px;
-}
-
-.nav-tab {
-  padding: 6px 18px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all .15s;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: 0.01em;
-}
-
+.nav-tabs { display: flex; gap: 4px; background: var(--grey); border-radius: 999px; padding: 4px; }
+.nav-tab { padding: 6px 18px; font-size: 0.78rem; font-weight: 600; border: none; background: transparent; color: var(--muted); border-radius: 999px; cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif; }
 .nav-tab:hover { color: var(--text); }
 .nav-tab.active { background: var(--white); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
 
-/* ── PAGES ── */
+/* PAGES */
 .page { display: none; }
 .page.active { display: block; }
 
-/* ── HERO ── */
-.hero {
-  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-mid) 50%, #1E8A9E 100%);
-  padding: 5rem 2rem 4.5rem;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
+/* HERO */
+.hero { background: linear-gradient(135deg, var(--teal) 0%, var(--teal-mid) 50%, #1E8A9E 100%); padding: 5rem 2rem 4.5rem; text-align: center; position: relative; overflow: hidden; }
+.hero::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 40px; background: var(--offwhite); clip-path: ellipse(55% 100% at 50% 100%); }
+.eyebrow { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 1rem; }
+.hero h1 { font-family: 'Nunito', sans-serif; font-size: clamp(2.4rem, 7vw, 4rem); font-weight: 900; line-height: 1.05; color: var(--white); margin-bottom: 0.85rem; letter-spacing: -0.02em; }
+.hero h1 em { font-style: italic; color: var(--tan); }
+.hero-sub { font-size: 0.95rem; color: rgba(255,255,255,0.8); max-width: 380px; margin: 0 auto; line-height: 1.7; }
 
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: -2px; left: 0; right: 0;
-  height: 40px;
-  background: var(--offwhite);
-  clip-path: ellipse(55% 100% at 50% 100%);
-}
+/* LAYOUT */
+.section { max-width: 560px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+.section-wide { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+.section-title { font-family: 'Nunito', sans-serif; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); display: block; }
+.divider { height: 1px; background: var(--border); margin: 2rem 0; }
 
-.eyebrow {
-  display: inline-block;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.7);
-  margin-bottom: 1rem;
-}
+/* CARDS */
+.card { background: var(--white); border-radius: 16px; padding: 1.75rem; box-shadow: 0 2px 16px rgba(0,0,0,0.06); border: 1px solid var(--border); }
+.card + .card, .card + .vc-wrap { margin-top: 1rem; }
+.card h2 { font-family: 'Nunito', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: 0.35rem; }
+.card p { font-size: 0.83rem; color: var(--muted); margin-bottom: 1.35rem; line-height: 1.6; }
 
-.hero h1 {
-  font-family: 'Nunito', sans-serif;
-  font-size: clamp(2.4rem, 7vw, 4rem);
-  font-weight: 900;
-  line-height: 1.05;
-  color: var(--white);
-  margin-bottom: 0.85rem;
-  letter-spacing: -0.02em;
-}
-
-.hero h1 em {
-  font-style: italic;
-  color: var(--tan);
-}
-
-.hero-sub {
-  font-size: 0.95rem;
-  color: rgba(255,255,255,0.8);
-  max-width: 380px;
-  margin: 0 auto;
-  line-height: 1.7;
-  font-weight: 400;
-}
-
-/* ── CONTENT ── */
-.section {
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem 4rem;
-}
-
-.section-wide {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem 4rem;
-}
-
-.section-title {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--border);
-  display: block;
-}
-
-/* ── CARD ── */
-.card {
-  background: var(--white);
-  border-radius: 16px;
-  padding: 1.75rem;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-  border: 1px solid var(--border);
-}
-
-.card + .card { margin-top: 1rem; }
-
-.card h2 {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 0.35rem;
-}
-
-.card p {
-  font-size: 0.83rem;
-  color: var(--muted);
-  margin-bottom: 1.35rem;
-  line-height: 1.6;
-}
-
-/* ── LOCK ── */
-.lock-screen {
-  min-height: calc(100vh - 62px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  background: var(--offwhite);
-}
-
-.lock-card {
-  width: 100%;
-  max-width: 380px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2.5rem 2rem;
-  text-align: center;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-}
-
+/* LOCK */
+.lock-screen { min-height: calc(100vh - 62px); display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.lock-card { width: 100%; max-width: 380px; background: var(--white); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem 2rem; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
 .lock-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+.lock-card h2 { font-family: 'Nunito', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--text); margin-bottom: 0.35rem; }
+.lock-card p { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.75rem; line-height: 1.6; }
 
-.lock-card h2 {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 0.35rem;
-}
+/* FORMS */
+label { display: block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--body); margin-bottom: 0.4rem; }
+input[type="text"], input[type="number"], input[type="password"], select { width: 100%; padding: 0.8rem 1rem; background: var(--offwhite); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; margin-bottom: 1rem; transition: border-color .15s, box-shadow .15s; outline: none; appearance: none; }
+input:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(26,107,124,0.12); }
+.input-row { display: flex; gap: 0.5rem; align-items: flex-start; }
+.input-row input { margin-bottom: 0; flex: 1; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
 
-.lock-card p {
-  font-size: 0.82rem;
-  color: var(--muted);
-  margin-bottom: 1.75rem;
-  line-height: 1.6;
-}
-
-/* ── FORMS ── */
-label {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--body);
-  margin-bottom: 0.4rem;
-}
-
-input[type="text"],
-input[type="number"],
-input[type="password"],
-select {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  background: var(--offwhite);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  transition: border-color .15s, box-shadow .15s;
-  outline: none;
-  appearance: none;
-}
-
-input:focus, select:focus {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(26,107,124,0.12);
-}
-
-/* ── BUTTONS ── */
-.btn {
-  display: block;
-  width: 100%;
-  padding: 0.85rem 1.5rem;
-  background: var(--tan);
-  color: var(--text);
-  border: none;
-  border-radius: 999px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: background .15s, transform .1s, box-shadow .15s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.btn:hover { background: var(--tan-d); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+/* BUTTONS */
+.btn { display: block; width: 100%; padding: 0.85rem 1.5rem; background: var(--tan); color: var(--text); border: none; border-radius: 999px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 800; cursor: pointer; transition: background .15s, transform .1s, box-shadow .15s; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.btn:hover { background: var(--tan-d); }
 .btn:active { transform: scale(0.98); }
-
-.btn-teal {
-  background: var(--teal);
-  color: var(--white);
-}
+.btn-teal { background: var(--teal); color: var(--white); }
 .btn-teal:hover { background: var(--teal-dark); }
-
-.btn-maroon {
-  background: var(--maroon);
-  color: var(--white);
-}
+.btn-maroon { background: var(--maroon); color: var(--white); }
 .btn-maroon:hover { background: var(--maroon-d); }
-
-.btn-sm {
-  width: auto;
-  display: inline-block;
-  padding: 0.6rem 1.1rem;
-  font-size: 0.78rem;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--body);
-  border: 1.5px solid var(--border);
-  box-shadow: none;
-}
+.btn-sm { width: auto; display: inline-block; padding: 0.6rem 1.1rem; font-size: 0.78rem; }
+.btn-ghost { background: transparent; color: var(--body); border: 1.5px solid var(--border); box-shadow: none; }
 .btn-ghost:hover { background: var(--grey); color: var(--text); box-shadow: none; }
 
-.input-row {
-  display: flex;
-  gap: 0.5rem;
-  align-items: flex-start;
-}
-.input-row input { margin-bottom: 0; flex: 1; }
-
-/* ── RESULTS ── */
-.result {
-  display: none;
-  margin-top: 1rem;
-  border-radius: 12px;
-  padding: 1.25rem;
-}
-
+/* RESULTS */
+.result { display: none; margin-top: 1rem; border-radius: 12px; padding: 1.25rem; }
 .result.ok   { background: #EAF7EE; border: 1.5px solid #A8D8B8; }
 .result.err  { background: #FAEAEA; border: 1.5px solid #E8B4B0; }
 .result.warn { background: #FEF8EA; border: 1.5px solid #E8D48A; }
-
 .result-icon  { font-size: 1.4rem; margin-bottom: 0.4rem; display: block; }
-.result-title {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 0.3rem;
-}
+.result-title { font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 0.3rem; }
 .result-body  { font-size: 0.8rem; color: var(--body); line-height: 1.6; }
-.result-amount {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.8rem;
-  font-weight: 900;
-  color: var(--green);
-  margin-top: 0.5rem;
-  display: block;
-}
+.result-amount { font-family: 'Nunito', sans-serif; font-size: 1.8rem; font-weight: 900; color: var(--green); margin-top: 0.5rem; display: block; }
 
-/* ── VOUCHER CARD ── */
+/* VOUCHER CARD */
 .vc-wrap { display: none; margin-top: 1.25rem; }
-
-.vc {
-  background: var(--white);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  border: 1px solid var(--border);
-  position: relative;
-}
-
-.vc-stripe {
-  height: 6px;
-  width: 100%;
-}
-.vc-50 .vc-stripe { background: linear-gradient(90deg, var(--tan), #E8B87A); }
-.vc-20 .vc-stripe { background: linear-gradient(90deg, var(--teal), var(--teal-mid)); }
-
+.vc { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+.vc-stripe { height: 6px; width: 100%; }
 .vc-inner { padding: 1.5rem; }
-
-.vc-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1.1rem;
-  padding-bottom: 1.1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.vc-brand {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--text);
-}
-
-.vc-brand-sub {
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 2px;
-  display: block;
-}
-
-.vc-amt-val {
-  font-family: 'Nunito', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: var(--teal);
-  line-height: 1;
-  text-align: right;
-}
-
-.vc-50 .vc-amt-val { color: var(--tan-d); }
-
-.vc-amt-lbl {
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  text-align: right;
-  margin-top: 2px;
-  display: block;
-}
-
-.vc-pills {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.1rem;
-}
-
-.pill {
-  background: var(--grey);
-  border-radius: 999px;
-  padding: 3px 10px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--body);
-}
-
-.vc-code-box {
-  background: var(--offwhite);
-  border: 1.5px dashed var(--border);
-  border-radius: 10px;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.vc-code-lbl {
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.2rem;
-  display: block;
-}
-
-.vc-code-val {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: 0.04em;
-}
-
+.vc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.1rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--border); }
+.vc-brand { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); }
+.vc-brand-sub { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 2px; display: block; }
+.vc-amt-val { font-family: 'Nunito', sans-serif; font-size: 2.2rem; font-weight: 900; color: var(--teal); line-height: 1; text-align: right; }
+.vc-amt-lbl { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: right; margin-top: 2px; display: block; }
+.pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+.pill { background: var(--grey); border-radius: 999px; padding: 3px 10px; font-size: 0.65rem; font-weight: 600; color: var(--body); }
+.code-box { background: var(--offwhite); border: 1.5px dashed var(--border); border-radius: 10px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.code-lbl { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.2rem; display: block; }
+.code-val { font-family: 'Nunito', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text); letter-spacing: 0.04em; }
 .status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.dot-ok   { background: var(--green); }
-.dot-used { background: var(--red); }
+.dot-ok { background: var(--green); } .dot-used { background: var(--red); }
+.vc-foot { font-size: 0.67rem; color: var(--muted); line-height: 1.65; border-top: 1px solid var(--border); padding-top: 0.85rem; }
 
-.vc-footer {
-  font-size: 0.67rem;
-  color: var(--muted);
-  line-height: 1.65;
-  border-top: 1px solid var(--border);
-  padding-top: 0.85rem;
-}
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.stat-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; display: block; }
+.stat-value { font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 900; color: var(--text); line-height: 1; }
+.stat-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; display: block; }
+.pb-wrap { background: var(--grey); border-radius: 999px; height: 4px; margin-top: 0.75rem; overflow: hidden; }
+.pb { height: 100%; border-radius: 999px; transition: width .5s ease; background: var(--teal); }
 
-/* ── ADMIN STATS ── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
+/* TIERS TABLE */
+.tiers-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 
-.stat-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
+/* ADD VOUCHER FORM */
+.add-voucher-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.add-voucher-card h3 { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 0.25rem; }
+.add-voucher-card p { font-size: 0.78rem; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.5; }
 
-.stat-label {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.stat-value {
-  font-family: 'Nunito', sans-serif;
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--text);
-  line-height: 1;
-}
-
-.stat-sub {
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-top: 0.3rem;
-  display: block;
-}
-
-.pb-wrap {
-  background: var(--grey);
-  border-radius: 999px;
-  height: 4px;
-  margin-top: 0.75rem;
-  overflow: hidden;
-}
-
-.pb { height: 100%; border-radius: 999px; transition: width .5s ease; }
-.pb-tan  { background: var(--tan); }
-.pb-teal { background: var(--teal); }
-
-/* ── GEN CARD ── */
-.gen-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.gen-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.gen-row:last-child { border-bottom: none; }
-
-.gen-name {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 0.15rem;
-}
-
-.gen-sub { font-size: 0.72rem; color: var(--muted); }
-.gen-action { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
-.gen-remaining { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
-
-/* ── LOG TABLE ── */
-.log-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
+/* LOG TABLE */
+.log-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-
-th {
-  background: var(--grey);
-  padding: 0.65rem 1rem;
-  text-align: left;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  border-bottom: 1px solid var(--border);
-}
-
-td {
-  padding: 0.82rem 1rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--body);
-  vertical-align: middle;
-}
-
+th { background: var(--grey); padding: 0.65rem 1rem; text-align: left; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+td { padding: 0.82rem 1rem; border-bottom: 1px solid var(--border); color: var(--body); vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: var(--offwhite); }
-
-.badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.65rem;
-  font-weight: 700;
-}
-
-.bg50   { background: #FEF3E2; color: #8B6000; }
-.bg20   { background: #E0F2F4; color: var(--teal-dark); }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; }
 .bgdau  { background: #E0EAF7; color: #2B5AAD; }
 .bgkape { background: #E8F5EC; color: var(--green); }
 
-.section-divider { height: 1px; background: var(--border); margin: 2rem 0; }
-
-.empty {
-  text-align: center;
-  padding: 3.5rem 2rem;
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-.empty-icon { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
-
-/* ── FOOTER ── */
-footer {
-  background: var(--text);
-  color: rgba(255,255,255,0.6);
-  padding: 3rem 2rem 2rem;
-  margin-top: 4rem;
-}
-
-.footer-grid {
-  max-width: 900px;
-  margin: 0 auto 2rem;
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 2rem;
-}
-
-.footer-brand {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--white);
-  margin-bottom: 0.5rem;
-}
-
+/* FOOTER */
+footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 3rem 2rem 2rem; margin-top: 4rem; }
+.footer-grid { max-width: 900px; margin: 0 auto 2rem; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; }
+.footer-brand { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: var(--white); margin-bottom: 0.5rem; }
 .footer-desc { font-size: 0.78rem; line-height: 1.65; max-width: 220px; }
-
-.footer-col h4 {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 0.85rem;
-}
-
-.footer-col a {
-  display: block;
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.6);
-  text-decoration: none;
-  margin-bottom: 0.45rem;
-  transition: color .15s;
-}
-
+.footer-col h4 { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 0.85rem; }
+.footer-col a { display: block; font-size: 0.78rem; color: rgba(255,255,255,0.6); text-decoration: none; margin-bottom: 0.45rem; transition: color .15s; }
 .footer-col a:hover { color: var(--white); }
+.footer-bottom { max-width: 900px; margin: 0 auto; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.72rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
 
-.footer-bottom {
-  max-width: 900px;
-  margin: 0 auto;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  font-size: 0.72rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-/* ── TOAST ── */
-.toast {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%) translateY(60px);
-  background: var(--text);
-  color: var(--white);
-  padding: 0.7rem 1.4rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  opacity: 0;
-  transition: all .25s;
-  z-index: 999;
-  white-space: nowrap;
-  pointer-events: none;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
+/* TOAST */
+.toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--text); color: var(--white); padding: 0.7rem 1.4rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; opacity: 0; transition: all .25s; z-index: 999; white-space: nowrap; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ── KEY BAR ── */
-.key-bar {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-.key-bar label { margin-bottom: 0; white-space: nowrap; }
-.key-bar input { margin-bottom: 0; flex: 1; min-width: 160px; }
+/* EMPTY */
+.empty { text-align: center; padding: 3rem 2rem; color: var(--muted); font-size: 0.82rem; }
+.empty-icon { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 700px) {
-  nav { padding: 0 1rem; }
-  .nav-tab { padding: 5px 10px; font-size: 0.72rem; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
-  .gen-row { flex-direction: column; align-items: flex-start; }
+@media(max-width:700px){
+  nav{padding:0 1rem;} .nav-tab{padding:5px 10px;font-size:.72rem;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:1fr;}
 }
-
-@media (max-width: 480px) {
-  .stats-grid { grid-template-columns: 1fr; }
-  .footer-grid { grid-template-columns: 1fr; }
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <a class="nav-brand" href="https://morgenkaffee.com">
     <span class="nav-logo">☕</span>
     <span class="nav-wordmark">Morgen <span>Kaffee</span></span>
   </a>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('member', this)">Member</button>
-    <button class="nav-tab" onclick="goProtected('staff', this)">Staff</button>
-    <button class="nav-tab" onclick="goProtected('admin', this)">Admin</button>
+    <button class="nav-tab active" onclick="showPage('member',this)">Member</button>
+    <button class="nav-tab" onclick="goProtected('staff',this)">Staff</button>
+    <button class="nav-tab" onclick="goProtected('admin',this)">Admin</button>
   </div>
 </nav>
 
-<!-- ═══════════════ MEMBER PAGE ═══════════════ -->
+<!-- ══ MEMBER ══ -->
 <div class="page active" id="page-member">
   <div class="hero">
     <span class="eyebrow">Morgen Kaffee & Kapebaluan · Voucher Program</span>
     <h1>A little off<br>every <em>cup.</em></h1>
     <p class="hero-sub">Enter your voucher code below and show it at the counter to redeem your discount.</p>
   </div>
-
   <div class="section">
     <span class="section-title">Look up your voucher</span>
-
     <div class="card">
       <h2>View your voucher</h2>
       <p>Enter the code printed on your voucher card. Show this screen + your physical voucher to your barista.</p>
-
       <label>Voucher code</label>
       <div class="input-row" style="margin-bottom:0;">
-        <input type="text" id="m-code" placeholder="e.g. MCG50-2026-001" oninput="this.value=this.value.toUpperCase()" autocomplete="off">
+        <input type="text" id="m-code" placeholder="e.g. MCG50-2026-A3K9X" oninput="this.value=this.value.toUpperCase()" autocomplete="off">
         <button class="btn btn-teal btn-sm" onclick="memberLookup()">Look up</button>
       </div>
       <div id="m-result" class="result"></div>
     </div>
-
-    <!-- ₱50 card -->
-    <div class="vc-wrap" id="vc-50-wrap">
-      <div class="vc vc-50">
-        <div class="vc-stripe"></div>
+    <div class="vc-wrap" id="vc-member-wrap">
+      <div class="vc" id="vc-member">
+        <div class="vc-stripe" id="vc-member-stripe"></div>
         <div class="vc-inner">
           <div class="vc-head">
             <div>
@@ -791,60 +223,20 @@ footer {
               <span class="vc-brand-sub">& Kapebaluan · Partner Voucher</span>
             </div>
             <div>
-              <div class="vc-amt-val">₱50</div>
+              <div class="vc-amt-val" id="vc-member-amount">—</div>
               <span class="vc-amt-lbl">off your order</span>
             </div>
           </div>
-          <div class="vc-pills">
-            <span class="pill">Min. order ₱300</span>
-            <span class="pill">Both branches</span>
-            <span class="pill">AY 2026–2027</span>
+          <div class="pills" id="vc-member-pills"></div>
+          <div class="code-box">
+            <div><span class="code-lbl">Control No.</span><div class="code-val" id="vc-member-code">—</div></div>
+            <div class="status-dot dot-ok"></div>
           </div>
-          <div class="vc-code-box">
-            <div>
-              <span class="vc-code-lbl">Control No.</span>
-              <div class="vc-code-val" id="vc50-code">—</div>
-            </div>
-            <div class="status-dot" id="vc50-dot"></div>
-          </div>
-          <div class="vc-footer">Present this screen + voucher card at the counter. Min. order ₱300. Not combinable with other promos. One redemption per voucher. Valid AY 2026–2027, renewable annually.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ₱20 card -->
-    <div class="vc-wrap" id="vc-20-wrap">
-      <div class="vc vc-20">
-        <div class="vc-stripe"></div>
-        <div class="vc-inner">
-          <div class="vc-head">
-            <div>
-              <div class="vc-brand">Morgen Kaffee</div>
-              <span class="vc-brand-sub">& Kapebaluan · Partner Voucher</span>
-            </div>
-            <div>
-              <div class="vc-amt-val">₱20</div>
-              <span class="vc-amt-lbl">off your order</span>
-            </div>
-          </div>
-          <div class="vc-pills">
-            <span class="pill">Min. order ₱230</span>
-            <span class="pill">Both branches</span>
-            <span class="pill">AY 2026–2027</span>
-          </div>
-          <div class="vc-code-box">
-            <div>
-              <span class="vc-code-lbl">Control No.</span>
-              <div class="vc-code-val" id="vc20-code">—</div>
-            </div>
-            <div class="status-dot" id="vc20-dot"></div>
-          </div>
-          <div class="vc-footer">Present this screen + voucher card at the counter. Min. order ₱230. Not combinable with other promos. One redemption per voucher. Valid AY 2026–2027, renewable annually.</div>
+          <div class="vc-foot" id="vc-member-foot"></div>
         </div>
       </div>
     </div>
   </div>
-
   <footer>
     <div class="footer-grid">
       <div>
@@ -878,7 +270,7 @@ footer {
   </footer>
 </div>
 
-<!-- ═══════════════ STAFF PAGE ═══════════════ -->
+<!-- ══ STAFF ══ -->
 <div class="page" id="page-staff">
   <div class="lock-screen" id="staff-lock">
     <div class="lock-card">
@@ -891,7 +283,6 @@ footer {
       <div id="staff-lock-err" style="color:#C0392B;font-size:.78rem;margin-top:.75rem;display:none;">Incorrect password. Try again.</div>
     </div>
   </div>
-
   <div id="staff-tool" style="display:none;">
     <div class="hero">
       <span class="eyebrow">Staff Tool · Morgen Coffee Group</span>
@@ -902,7 +293,7 @@ footer {
       <span class="section-title">Redeem a voucher</span>
       <div class="card">
         <label>Voucher code</label>
-        <input type="text" id="s-code" placeholder="MCG50-2026-001 or MCG20-2026-001" style="text-transform:uppercase;font-weight:600;" oninput="this.value=this.value.toUpperCase()" autocomplete="off">
+        <input type="text" id="s-code" placeholder="e.g. MCG50-2026-A3K9X" style="text-transform:uppercase;font-weight:600;" oninput="this.value=this.value.toUpperCase()" autocomplete="off">
         <label>Branch</label>
         <select id="s-branch">
           <option value="">Select branch</option>
@@ -918,13 +309,13 @@ footer {
   </div>
 </div>
 
-<!-- ═══════════════ ADMIN PAGE ═══════════════ -->
+<!-- ══ ADMIN ══ -->
 <div class="page" id="page-admin">
   <div class="lock-screen" id="admin-lock">
     <div class="lock-card">
       <span class="lock-icon">🔐</span>
       <h2>Admin access</h2>
-      <p>Enter the admin password to view the voucher dashboard and generate code batches.</p>
+      <p>Enter the admin password to view the voucher dashboard and manage batches.</p>
       <label>Password</label>
       <input type="password" id="admin-pwd" placeholder="Admin password" onkeydown="if(event.key==='Enter')unlockAdmin()">
       <button class="btn btn-maroon" onclick="unlockAdmin()">Continue →</button>
@@ -936,52 +327,62 @@ footer {
     <div class="hero">
       <span class="eyebrow">Admin · Morgen Coffee Group</span>
       <h1>Voucher<br><em>dashboard.</em></h1>
-      <p class="hero-sub">AY 2026–2027 · Morgen Dau & Kapebaluan</p>
+      <p class="hero-sub">Manage voucher batches across both branches.</p>
     </div>
 
     <div class="section-wide">
+
+      <!-- OVERVIEW -->
       <span class="section-title">Overview</span>
       <div class="stats-grid" id="stats-grid">
-        <div class="stat-card"><span class="stat-label">₱50 off · Redeemed</span><div class="stat-value">—</div></div>
-        <div class="stat-card"><span class="stat-label">₱20 off · Redeemed</span><div class="stat-value">—</div></div>
-        <div class="stat-card"><span class="stat-label">Total discount given</span><div class="stat-value">—</div></div>
-        <div class="stat-card"><span class="stat-label">Codes remaining</span><div class="stat-value">—</div></div>
+        <div class="stat-card"><span class="stat-label">Total issued</span><div class="stat-value" id="st-issued">—</div></div>
+        <div class="stat-card"><span class="stat-label">Total redeemed</span><div class="stat-value" id="st-redeemed">—</div></div>
+        <div class="stat-card"><span class="stat-label">Total discount given</span><div class="stat-value" id="st-discount">—</div></div>
+        <div class="stat-card"><span class="stat-label">Codes remaining</span><div class="stat-value" id="st-remaining">—</div></div>
       </div>
 
-      <div class="section-divider"></div>
-      <span class="section-title">Generate voucher codes</span>
+      <div class="divider"></div>
 
-      <div class="gen-card">
-        <div class="gen-row">
+      <!-- ADD NEW VOUCHER BATCH -->
+      <span class="section-title">Add new voucher batch</span>
+      <div class="add-voucher-card">
+        <h3>Create a voucher type</h3>
+        <p>Set the prefix, discount, minimum order, and quantity. Click Create to add it, then Generate to produce the codes.</p>
+        <div class="form-grid">
           <div>
-            <div class="gen-name">₱50 off voucher</div>
-            <div class="gen-sub">MCG50-2026 · Min. ₱300 · 50 pcs batch limit</div>
+            <label>Prefix (e.g. MCG100-2026)</label>
+            <input type="text" id="new-prefix" placeholder="MCG100-2026" oninput="this.value=this.value.toUpperCase()">
           </div>
-          <div class="gen-action">
-            <span class="gen-remaining" id="rem-50">—</span>
-            <button class="btn btn-sm btn-teal" onclick="generateBatch('50')">Generate all</button>
+          <div>
+            <label>Discount amount (₱)</label>
+            <input type="number" id="new-discount" placeholder="e.g. 100" min="1">
+          </div>
+          <div>
+            <label>Minimum order (₱)</label>
+            <input type="number" id="new-minorder" placeholder="e.g. 500" min="1">
+          </div>
+          <div>
+            <label>Number of vouchers</label>
+            <input type="number" id="new-limit" placeholder="e.g. 100" min="1" max="500">
           </div>
         </div>
-        <div class="gen-row">
-          <div>
-            <div class="gen-name">₱20 off voucher</div>
-            <div class="gen-sub">MCG20-2026 · Min. ₱230 · 150 pcs batch limit</div>
-          </div>
-          <div class="gen-action">
-            <span class="gen-remaining" id="rem-20">—</span>
-            <button class="btn btn-sm btn-teal" onclick="generateBatch('20')">Generate all</button>
-          </div>
-        </div>
+        <button class="btn btn-teal btn-sm" onclick="createTier()" style="margin-top:.25rem;">+ Create voucher batch</button>
+        <div id="create-msg" style="font-size:.78rem;color:var(--muted);margin-top:.75rem;display:none;"></div>
       </div>
-      <div id="gen-msg" style="font-size:.78rem;color:var(--muted);margin-top:-.75rem;margin-bottom:1.5rem;display:none;"></div>
 
-      <div class="section-divider"></div>
+      <!-- ACTIVE BATCHES -->
+      <span class="section-title">Active voucher batches</span>
+      <div class="tiers-card" id="tiers-table">
+        <div class="empty"><span class="empty-icon">☕</span>Loading batches…</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- LOG -->
       <span class="section-title">Redemption log</span>
-
       <div class="log-card" id="log-card">
-        <div class="empty"><span class="empty-icon">☕</span>Loading data…</div>
+        <div class="empty"><span class="empty-icon">☕</span>Loading…</div>
       </div>
-
       <button class="btn btn-ghost btn-sm" style="margin-top:.75rem;" onclick="exportCSV()">Export CSV</button>
     </div>
   </div>
@@ -990,37 +391,36 @@ footer {
 <div class="toast" id="toast"></div>
 
 <script>
-const BASE      = '';
-const STAFF_PWD = 'morgen-jelly';
-const ADMIN_PWD = 'morgen-admin';
-const SERVER_KEY = 'morgen-admin-2026'; // matches VOUCHER_ADMIN_KEY on Render
+const BASE       = '';
+const STAFF_PWD  = 'morgen-staff';
+const ADMIN_PWD  = 'morgen-admin';
+const SERVER_KEY = 'morgen-admin-2026';
 
 let adminKey = '';
 let adminLog = [];
+let allSummary = {};
 let staffUnlocked = sessionStorage.getItem('staff_ok') === '1';
 let adminUnlocked = sessionStorage.getItem('admin_ok') === '1';
 
 if (staffUnlocked) applyStaffUnlock();
-if (adminUnlocked) { applyAdminUnlock(); }
+if (adminUnlocked) applyAdminUnlock();
 
+// ── NAV ──
 function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
 }
-
 function goProtected(id, btn) {
   showPage(id, btn);
   if (id === 'admin' && adminUnlocked) loadAdmin();
 }
 
-// STAFF LOCK
+// ── LOCK ──
 function unlockStaff() {
   if (document.getElementById('staff-pwd').value === STAFF_PWD) {
-    staffUnlocked = true;
-    sessionStorage.setItem('staff_ok', '1');
-    applyStaffUnlock();
+    staffUnlocked = true; sessionStorage.setItem('staff_ok','1'); applyStaffUnlock();
   } else {
     document.getElementById('staff-lock-err').style.display = 'block';
     document.getElementById('staff-pwd').value = '';
@@ -1030,15 +430,10 @@ function applyStaffUnlock() {
   document.getElementById('staff-lock').style.display = 'none';
   document.getElementById('staff-tool').style.display = 'block';
 }
-
-// ADMIN LOCK
 function unlockAdmin() {
   if (document.getElementById('admin-pwd').value === ADMIN_PWD) {
-    adminUnlocked = true;
-    adminKey = SERVER_KEY;
-    sessionStorage.setItem('admin_ok', '1');
-    applyAdminUnlock();
-    loadAdmin();
+    adminUnlocked = true; adminKey = SERVER_KEY;
+    sessionStorage.setItem('admin_ok','1'); applyAdminUnlock(); loadAdmin();
   } else {
     document.getElementById('admin-lock-err').style.display = 'block';
     document.getElementById('admin-pwd').value = '';
@@ -1050,32 +445,31 @@ function applyAdminUnlock() {
   document.getElementById('admin-tool').style.display = 'block';
 }
 
-// MEMBER
+// ── MEMBER ──
 async function memberLookup() {
   const code = document.getElementById('m-code').value.trim().toUpperCase();
   const res  = document.getElementById('m-result');
-  document.getElementById('vc-50-wrap').style.display = 'none';
-  document.getElementById('vc-20-wrap').style.display = 'none';
+  document.getElementById('vc-member-wrap').style.display = 'none';
   if (!code) { showToast('Enter a voucher code.'); return; }
   try {
     const r = await fetch(`${BASE}/vouchers/check/${encodeURIComponent(code)}`);
     const d = await r.json();
-    if (!d.valid && d.reason === 'not_found') { showResult(res,'err','✕','Code not found','Check the code on your voucher card and try again.'); return; }
-    if (d.status === 'used') { showResult(res,'err','✕','Already redeemed',`This voucher was used on ${d.date} at ${d.branch}. Each voucher is valid for one redemption.`); return; }
+    if (!d.valid && d.reason==='not_found') { showResult(res,'err','✕','Code not found','Check the code on your voucher card and try again.'); return; }
+    if (d.status==='used') { showResult(res,'err','✕','Already redeemed',`This voucher was used on ${d.date} at ${d.branch}.`); return; }
     showResult(res,'ok','✓','Voucher is valid',`Show this to your barista along with your voucher card. Min. order ₱${d.minOrder}. Not combinable with other promos.`);
-    if (d.tier === '50') {
-      document.getElementById('vc50-code').textContent = code;
-      document.getElementById('vc50-dot').className = 'status-dot dot-ok';
-      document.getElementById('vc-50-wrap').style.display = 'block';
-    } else {
-      document.getElementById('vc20-code').textContent = code;
-      document.getElementById('vc20-dot').className = 'status-dot dot-ok';
-      document.getElementById('vc-20-wrap').style.display = 'block';
-    }
-  } catch(e) { showResult(res,'err','!','Connection error','Could not reach the server. Check your internet and try again.'); }
+    // Populate dynamic voucher card
+    document.getElementById('vc-member-amount').textContent = `₱${d.discount}`;
+    document.getElementById('vc-member-code').textContent   = code;
+    document.getElementById('vc-member-stripe').style.background = `linear-gradient(90deg, var(--teal), var(--teal-mid))`;
+    document.getElementById('vc-member-pills').innerHTML =
+      `<span class="pill">Min. order ₱${d.minOrder}</span><span class="pill">Both branches</span><span class="pill">AY 2026–2027</span>`;
+    document.getElementById('vc-member-foot').textContent =
+      `Present this screen + voucher card at the counter. Min. order ₱${d.minOrder}. Not combinable with other promos. One redemption per voucher.`;
+    document.getElementById('vc-member-wrap').style.display = 'block';
+  } catch(e) { showResult(res,'err','!','Connection error','Could not reach the server.'); }
 }
 
-// STAFF
+// ── STAFF ──
 async function staffRedeem() {
   const code   = document.getElementById('s-code').value.trim().toUpperCase();
   const branch = document.getElementById('s-branch').value;
@@ -1086,70 +480,128 @@ async function staffRedeem() {
   if (!amount||amount<1) { showToast('Enter a valid order amount.'); return; }
   try {
     const r = await fetch(`${BASE}/vouchers/redeem`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ code, branch, amount })
     });
     const d = await r.json();
     if (d.ok) {
-      res.className = 'result ok'; res.style.display = 'block';
-      res.innerHTML = `<span class="result-icon">✓</span><div class="result-title">Discount applied!</div>
-        <div class="result-body">${code} · ₱${d.tier} off · ${branch}<br>${d.date} · ${d.time}</div>
+      res.className='result ok'; res.style.display='block';
+      res.innerHTML=`<span class="result-icon">✓</span><div class="result-title">Discount applied!</div>
+        <div class="result-body">${code} · ${d.label} · ${branch}<br>${d.date} · ${d.time}</div>
         <span class="result-amount">−₱${d.discount.toFixed(2)}</span>
         <div class="result-body" style="margin-top:.35rem;">₱${parseFloat(amount).toFixed(2)} → <strong>₱${d.final.toFixed(2)}</strong> after discount</div>`;
-      document.getElementById('s-code').value = '';
-      document.getElementById('s-branch').value = '';
-      document.getElementById('s-amount').value = '';
+      document.getElementById('s-code').value='';
+      document.getElementById('s-branch').value='';
+      document.getElementById('s-amount').value='';
       showToast('Redemption logged ✓');
     } else {
       const m = {
-        invalid_code:  ['err','✕','Invalid code','This code doesn\'t exist in the system. Do not apply the discount.'],
-        already_used:  ['err','✕','Already redeemed',`Used on ${d.date} at ${d.branch}. Do not apply the discount.`],
-        below_minimum: ['warn','!','Minimum order not met',`This voucher requires a minimum order of ₱${d.minOrder}. Current order: ₱${amount.toFixed(2)}. Do not apply.`],
-      }[d.reason] || ['err','✕','Error','Something went wrong.'];
-      showResult(res, m[0], m[1], m[2], m[3]);
+        invalid_code:  ['err','✕','Invalid code','This code doesn\'t exist. Do not apply the discount.'],
+        already_used:  ['err','✕','Already redeemed',`Used on ${d.date} at ${d.branch}. Do not apply.`],
+        below_minimum: ['warn','!','Minimum not met',`Requires min. ₱${d.minOrder}. Current: ₱${amount.toFixed(2)}. Do not apply.`],
+      }[d.reason]||['err','✕','Error','Something went wrong.'];
+      showResult(res,m[0],m[1],m[2],m[3]);
     }
   } catch(e) { showResult(res,'err','!','Connection error','Could not reach the server.'); }
 }
 
-// ADMIN
+// ── ADMIN ──
 async function loadAdmin() {
   if (!adminKey) return;
   try {
-    const r = await fetch(`${BASE}/vouchers/summary`, { headers: { 'x-admin-key': adminKey } });
-    if (r.status === 403) { showToast('Admin key mismatch.'); return; }
+    const r = await fetch(`${BASE}/vouchers/summary`, { headers:{'x-admin-key':adminKey} });
+    if (r.status===403) { showToast('Admin key mismatch.'); return; }
     const d = await r.json();
-    adminLog = d.log || [];
-    renderStats(d.summary);
+    adminLog    = d.log || [];
+    allSummary  = d.summary || {};
+    renderOverview(d.summary);
+    renderTiersTable(d.summary);
     renderLog(d.log);
   } catch(e) { showToast('Could not load dashboard.'); }
 }
 
-function renderStats(s) {
-  const L = {'50':50,'20':150};
-  const s50 = s['50']||{}, s20 = s['20']||{};
-  const totalDisc = (s50.totalDiscount||0) + (s20.totalDiscount||0);
-  const totalRem  = (L['50']-(s50.issued||0)) + (L['20']-(s20.issued||0));
-  const p50 = s50.issued>0 ? Math.round(s50.redeemed/s50.issued*100) : 0;
-  const p20 = s20.issued>0 ? Math.round(s20.redeemed/s20.issued*100) : 0;
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><span class="stat-label">₱50 off · Redeemed</span><div class="stat-value">${s50.redeemed||0}</div><span class="stat-sub">of ${s50.issued||0} issued · ${L['50']} limit</span><div class="pb-wrap"><div class="pb pb-tan" style="width:${p50}%"></div></div></div>
-    <div class="stat-card"><span class="stat-label">₱20 off · Redeemed</span><div class="stat-value">${s20.redeemed||0}</div><span class="stat-sub">of ${s20.issued||0} issued · ${L['20']} limit</span><div class="pb-wrap"><div class="pb pb-teal" style="width:${p20}%"></div></div></div>
-    <div class="stat-card"><span class="stat-label">Total discount given</span><div class="stat-value">₱${totalDisc.toFixed(0)}</div><span class="stat-sub">AY 2026–2027</span></div>
-    <div class="stat-card"><span class="stat-label">Codes remaining</span><div class="stat-value">${totalRem}</div><span class="stat-sub">across both tiers</span></div>`;
-  document.getElementById('rem-50').textContent = `${L['50']-(s50.issued||0)} remaining`;
-  document.getElementById('rem-20').textContent = `${L['20']-(s20.issued||0)} remaining`;
+function renderOverview(s) {
+  let issued=0, redeemed=0, discount=0, remaining=0;
+  for (const v of Object.values(s)) {
+    issued    += v.issued;
+    redeemed  += v.redeemed;
+    discount  += v.totalDiscount;
+    remaining += v.available;
+  }
+  document.getElementById('st-issued').textContent    = issued;
+  document.getElementById('st-redeemed').textContent  = redeemed;
+  document.getElementById('st-discount').textContent  = `₱${discount.toFixed(0)}`;
+  document.getElementById('st-remaining').textContent = remaining;
+}
+
+function renderTiersTable(s) {
+  const wrap = document.getElementById('tiers-table');
+  if (!Object.keys(s).length) {
+    wrap.innerHTML = `<div class="empty"><span class="empty-icon">☕</span>No batches yet. Create one above.</div>`; return;
+  }
+  let rows = `<table><thead><tr>
+    <th>Prefix</th><th>Discount</th><th>Min. Order</th><th>Issued</th><th>Redeemed</th><th>Remaining</th><th>Action</th>
+  </tr></thead><tbody>`;
+  for (const [key, v] of Object.entries(s)) {
+    const pct = v.issued>0 ? Math.round(v.redeemed/v.issued*100):0;
+    rows += `<tr>
+      <td><strong>${key.startsWith('50')||key.startsWith('20') ? (key==='50'?'MCG50-2026':key==='20'?'MCG20-2026':'') : ''}</strong>
+          <span style="font-size:.7rem;color:var(--muted)">${v.label}</span></td>
+      <td><strong>₱${v.discount}</strong></td>
+      <td>₱${v.minOrder}</td>
+      <td>${v.issued} / ${v.limit}</td>
+      <td>${v.redeemed} <span style="color:var(--muted);font-size:.72rem">(${pct}%)</span></td>
+      <td style="color:${v.available>0?'var(--green)':'var(--red)'};font-weight:700;">${v.available}</td>
+      <td><button class="btn btn-teal btn-sm" onclick="generateBatch('${key}')">Generate</button></td>
+    </tr>`;
+  }
+  wrap.innerHTML = rows + '</tbody></table>';
 }
 
 function renderLog(log) {
   const card = document.getElementById('log-card');
   if (!log||log.length===0) { card.innerHTML=`<div class="empty"><span class="empty-icon">☕</span>No redemptions yet.</div>`; return; }
-  let rows = `<table><thead><tr><th>Control No.</th><th>Tier</th><th>Date</th><th>Branch</th><th>Order (₱)</th><th>Discount (₱)</th></tr></thead><tbody>`;
+  let rows = `<table><thead><tr><th>Code</th><th>Voucher</th><th>Date</th><th>Branch</th><th>Order (₱)</th><th>Discount (₱)</th></tr></thead><tbody>`;
   log.forEach(r => {
-    const tb = r.tier==='50'?'<span class="badge bg50">₱50 off</span>':'<span class="badge bg20">₱20 off</span>';
     const bb = r.branch==='Morgen Dau'?'<span class="badge bgdau">Morgen Dau</span>':'<span class="badge bgkape">Kapebaluan</span>';
-    rows += `<tr><td><strong>${r.code}</strong></td><td>${tb}</td><td style="white-space:nowrap">${r.date} <span style="color:var(--muted);font-size:.7rem">${r.time}</span></td><td>${bb}</td><td>₱${parseFloat(r.amount).toFixed(2)}</td><td style="color:var(--green);font-weight:700;">−₱${r.tier==='50'?'50.00':'20.00'}</td></tr>`;
+    rows+=`<tr>
+      <td><strong>${r.code}</strong></td>
+      <td>${r.label||'—'}</td>
+      <td style="white-space:nowrap">${r.date} <span style="color:var(--muted);font-size:.7rem">${r.time}</span></td>
+      <td>${bb}</td>
+      <td>₱${parseFloat(r.amount).toFixed(2)}</td>
+      <td style="color:var(--green);font-weight:700;">−₱${r.discount.toFixed(2)}</td>
+    </tr>`;
   });
   card.innerHTML = rows+'</tbody></table>';
+}
+
+async function createTier() {
+  const prefix   = document.getElementById('new-prefix').value.trim().toUpperCase();
+  const discount = document.getElementById('new-discount').value;
+  const minOrder = document.getElementById('new-minorder').value;
+  const limit    = document.getElementById('new-limit').value;
+  const msg      = document.getElementById('create-msg');
+
+  if (!prefix||!discount||!minOrder||!limit) { showToast('Fill in all fields.'); return; }
+
+  try {
+    const r = await fetch(`${BASE}/vouchers/tiers`, {
+      method:'POST', headers:{'Content-Type':'application/json','x-admin-key':adminKey},
+      body: JSON.stringify({ prefix, discount, minOrder, limit })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      msg.style.display='block';
+      msg.textContent=`✓ Created: ${d.tier.label} · ${prefix} · Min. ₱${d.tier.minOrder} · ${d.tier.limit} pcs. Now click Generate in the table below.`;
+      document.getElementById('new-prefix').value='';
+      document.getElementById('new-discount').value='';
+      document.getElementById('new-minorder').value='';
+      document.getElementById('new-limit').value='';
+      showToast('Batch created ✓');
+      loadAdmin();
+    } else { msg.style.display='block'; msg.textContent=`Error: ${d.reason}`; }
+  } catch(e) { showToast('Connection error.'); }
 }
 
 async function generateBatch(tier) {
@@ -1160,30 +612,34 @@ async function generateBatch(tier) {
       body: JSON.stringify({ tier, adminKey })
     });
     const d = await r.json();
-    const msg = document.getElementById('gen-msg');
-    msg.style.display = 'block';
-    if (d.ok && d.created>0) { msg.textContent=`✓ Generated ${d.created} codes — ${d.from} to ${d.to}`; showToast(`${d.created} codes generated`); loadAdmin(); }
-    else { msg.textContent = d.message||'Batch limit already reached.'; }
+    if (d.ok && d.created>0) {
+      showToast(`✓ ${d.created} codes generated`);
+      const msg = document.getElementById('create-msg');
+      msg.style.display='block';
+      msg.textContent=`✓ Generated ${d.created} codes. Sample: ${(d.sample||[]).join(', ')}`;
+      loadAdmin();
+    } else { showToast(d.message||'Batch limit reached.'); }
   } catch(e) { showToast('Connection error.'); }
 }
 
 function exportCSV() {
   if (!adminLog.length) { showToast('No redemptions to export yet.'); return; }
-  let csv = 'Control No.,Tier,Date,Time,Branch,Order Amount (PHP),Discount (PHP)\n';
-  adminLog.forEach(r => { csv+=`${r.code},₱${r.tier} off,${r.date},${r.time},"${r.branch}",${r.amount},${r.tier==='50'?50:20}\n`; });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  let csv='Code,Voucher,Date,Time,Branch,Order Amount (PHP),Discount (PHP)\n';
+  adminLog.forEach(r=>{
+    csv+=`${r.code},"${r.label||''}",${r.date},${r.time},"${r.branch}",${r.amount},${r.discount}\n`;
+  });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download='Morgen_Voucher_Log.csv'; a.click();
   showToast('CSV exported');
 }
 
-function showResult(el, cls, icon, title, body) {
+function showResult(el,cls,icon,title,body){
   el.className=`result ${cls}`; el.style.display='block';
   el.innerHTML=`<span class="result-icon">${icon}</span><div class="result-title">${title}</div><div class="result-body">${body}</div>`;
 }
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
+function showToast(msg){
+  const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }

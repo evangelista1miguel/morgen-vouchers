@@ -376,6 +376,19 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 3rem 2r
         <div class="empty"><span class="empty-icon">☕</span>Loading batches…</div>
       </div>
 
+      <!-- ALL CODES -->
+            <span class="section-title">All voucher codes</span>
+            <div class="add-voucher-card" style="margin-bottom:1rem;">
+                      <div class="input-row" style="margin-bottom:0;">
+                                  <input type="text" id="codes-search" placeholder="Search by code" oninput="filterCodes()" style="margin-bottom:0;">
+                                  <button class="btn btn-ghost btn-sm" onclick="loadCodes()">Refresh</button>
+                      </div>
+                      <div style="font-size:.72rem;color:var(--muted);margin-top:.6rem;" id="codes-count"></div>
+            </div>
+            <div class="log-card" id="codes-table">
+                      <div class="empty"><span class="empty-icon"></span>Loading codes</div>
+            </div>
+      
       <div class="divider"></div>
 
       <!-- LOG -->
@@ -399,6 +412,7 @@ const SERVER_KEY = 'morgen2026admin';
 let adminKey = '';
 let adminLog = [];
 let allSummary = {};
+  let allCodes = [];
 let staffUnlocked = sessionStorage.getItem('staff_ok') === '1';
 let adminUnlocked = sessionStorage.getItem('admin_ok') === '1';
 
@@ -517,6 +531,7 @@ async function loadAdmin() {
     renderOverview(d.summary);
     renderTiersTable(d.summary);
     renderLog(d.log);
+    loadCodes();
   } catch(e) { showToast('Could not load dashboard.'); }
 }
 
@@ -641,7 +656,41 @@ async function generateBatch(tier) {
     } catch(e) { showToast('Connection error.'); }
   }
 
-function exportCSV() {
+async function loadCodes() {
+    if (!adminKey) return;
+    try {
+          const r = await fetch(`${BASE}/vouchers/list`, { headers:{'x-admin-key':adminKey} });
+          const d = await r.json();
+          allCodes = d.vouchers || [];
+          renderCodesTable(allCodes);
+    } catch(e) {}
+}
+  
+  function renderCodesTable(list) {
+      const wrap = document.getElementById('codes-table');
+      const countEl = document.getElementById('codes-count');
+      if (countEl) countEl.textContent = list.length + ' code(s) shown';
+      if (!list.length) { wrap.innerHTML = '<div class="empty">No codes found.</div>'; return; }
+      let rows = '<table><thead><tr><th>Code</th><th>Status</th><th>Branch</th><th>Redeemed</th></tr></thead><tbody>';
+      list.forEach(v => {
+            const used = v.status === 'used';
+            const statusColor = used ? 'var(--red)' : 'var(--green)';
+            const statusLabel = used ? 'Used' : 'Unused';
+            const branchLabel = v.branch || '-';
+            const dateLabel = v.date ? (v.date + ' ' + v.time) : '-';
+            rows += '<tr><td><strong>' + v.code + '</strong></td><td style="color:' + statusColor + ';font-weight:700;">' + statusLabel + '</td><td>' + branchLabel + '</td><td>' + dateLabel + '</td></tr>';
+      });
+      rows += '</tbody></table>';
+      wrap.innerHTML = rows;
+  }
+  
+  function filterCodes() {
+      const q = document.getElementById('codes-search').value.trim().toUpperCase();
+      if (!q) { renderCodesTable(allCodes); return; }
+      renderCodesTable(allCodes.filter(v => v.code.toUpperCase().includes(q)));
+  }
+  
+  function exportCSV() {
   if (!adminLog.length) { showToast('No redemptions to export yet.'); return; }
   let csv='Code,Voucher,Date,Time,Branch,Order Amount (PHP),Discount (PHP)\n';
   adminLog.forEach(r=>{

@@ -563,7 +563,6 @@ function renderTiersTable(s) {
 }
 
 function renderLog(log) {
-}
   const card = document.getElementById('log-card');
   if (!log||log.length===0) { card.innerHTML=`<div class="empty"><span class="empty-icon">☕</span>No redemptions yet.</div>`; return; }
   let rows = `<table><thead><tr><th>Code</th><th>Voucher</th><th>Date</th><th>Branch</th><th>Order (₱)</th><th>Discount (₱)</th></tr></thead><tbody>`;

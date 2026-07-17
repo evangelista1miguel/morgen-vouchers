@@ -276,9 +276,11 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 3rem 2r
     <div class="lock-card">
       <span class="lock-icon">🔒</span>
       <h2>Staff access</h2>
-      <p>Enter the staff password to validate and apply voucher discounts at the counter.</p>
+      <p>Log in to validate and apply voucher discounts at the counter.</p>
+      <label>Username</label>
+      <input type="text" id="staff-user" placeholder="Username" autocomplete="username">
       <label>Password</label>
-      <input type="password" id="staff-pwd" placeholder="Staff password" onkeydown="if(event.key==='Enter')unlockStaff()">
+      <input type="password" id="staff-pwd" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')unlockStaff()">
       <button class="btn btn-teal" onclick="unlockStaff()">Continue →</button>
       <div id="staff-lock-err" style="color:#C0392B;font-size:.78rem;margin-top:.75rem;display:none;">Incorrect password. Try again.</div>
     </div>
@@ -288,6 +290,7 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 3rem 2r
       <span class="eyebrow">Staff Tool · Morgen Coffee Group</span>
       <h1>Validate &<br><em>apply.</em></h1>
       <p class="hero-sub">Enter the customer's code, select your branch, and enter the order amount.</p>
+      <button class="btn btn-ghost btn-sm" style="margin-top:.5rem;" onclick="logout('staff')">Log out</button>
     </div>
     <div class="section">
       <span class="section-title">Redeem a voucher</span>
@@ -315,9 +318,11 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 3rem 2r
     <div class="lock-card">
       <span class="lock-icon">🔐</span>
       <h2>Admin access</h2>
-      <p>Enter the admin password to view the voucher dashboard and manage batches.</p>
+      <p>Log in to view the voucher dashboard and manage batches.</p>
+      <label>Username</label>
+      <input type="text" id="admin-user" placeholder="Username" autocomplete="username">
       <label>Password</label>
-      <input type="password" id="admin-pwd" placeholder="Admin password" onkeydown="if(event.key==='Enter')unlockAdmin()">
+      <input type="password" id="admin-pwd" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')unlockAdmin()">
       <button class="btn btn-maroon" onclick="unlockAdmin()">Continue →</button>
       <div id="admin-lock-err" style="color:#C0392B;font-size:.78rem;margin-top:.75rem;display:none;">Incorrect password. Try again.</div>
     </div>
@@ -328,6 +333,7 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 3rem 2r
       <span class="eyebrow">Admin · Morgen Coffee Group</span>
       <h1>Voucher<br><em>dashboard.</em></h1>
       <p class="hero-sub">Manage voucher batches across both branches.</p>
+      <button class="btn btn-ghost btn-sm" style="margin-top:.5rem;" onclick="logout('admin')">Log out</button>
     </div>
 
     <div class="section-wide">
@@ -404,20 +410,33 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 3rem 2r
 <div class="toast" id="toast"></div>
 
 <script>
-const BASE       = '';
-const STAFF_PWD  = 'morgen-staff';
-const ADMIN_PWD  = 'morgen2026admin';
-const SERVER_KEY = 'morgen2026admin';
+const BASE = '';
 
-let adminKey = '';
+let csrfToken = '';
+let currentRole = null; // null | 'staff' | 'admin'
 let adminLog = [];
 let allSummary = {};
-  let allCodes = [];
-let staffUnlocked = sessionStorage.getItem('staff_ok') === '1';
-let adminUnlocked = sessionStorage.getItem('admin_ok') === '1';
+let allCodes = [];
 
-if (staffUnlocked) applyStaffUnlock();
-if (adminUnlocked) applyAdminUnlock();
+// Fetch a CSRF token once on load, then check for an existing session
+// (so a page refresh doesn't force staff/admin to log in again).
+(async function initAuth() {
+  try {
+    const r = await fetch(`${BASE}/csrf`);
+    const d = await r.json();
+    csrfToken = d.csrfToken;
+  } catch (e) { /* csrf fetch failed, login attempts will just be rejected */ }
+
+  try {
+    const r = await fetch(`${BASE}/me`, { credentials: 'include' });
+    const d = await r.json();
+    if (d.ok) {
+      currentRole = d.role;
+      if (d.role === 'staff' || d.role === 'admin') applyStaffUnlock();
+      if (d.role === 'admin') applyAdminUnlock();
+    }
+  } catch (e) { /* not logged in, that's fine */ }
+})();
 
 // ── NAV ──
 function showPage(id, btn) {
@@ -428,13 +447,28 @@ function showPage(id, btn) {
 }
 function goProtected(id, btn) {
   showPage(id, btn);
-  if (id === 'admin' && adminUnlocked) loadAdmin();
+  if (id === 'admin' && currentRole === 'admin') loadAdmin();
 }
 
 // ── LOCK ──
-function unlockStaff() {
-  if (document.getElementById('staff-pwd').value === STAFF_PWD) {
-    staffUnlocked = true; sessionStorage.setItem('staff_ok','1'); applyStaffUnlock();
+async function doLogin(username, password) {
+  const r = await fetch(`${BASE}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+    credentials: 'include',
+    body: JSON.stringify({ username, password }),
+  });
+  return { status: r.status, data: await r.json() };
+}
+
+async function unlockStaff() {
+  const username = document.getElementById('staff-user').value.trim();
+  const password = document.getElementById('staff-pwd').value;
+  const { data } = await doLogin(username, password);
+  if (data.ok && (data.role === 'staff' || data.role === 'admin')) {
+    currentRole = data.role;
+    document.getElementById('staff-pwd').value = '';
+    applyStaffUnlock();
   } else {
     document.getElementById('staff-lock-err').style.display = 'block';
     document.getElementById('staff-pwd').value = '';
@@ -444,19 +478,36 @@ function applyStaffUnlock() {
   document.getElementById('staff-lock').style.display = 'none';
   document.getElementById('staff-tool').style.display = 'block';
 }
-function unlockAdmin() {
-  if (document.getElementById('admin-pwd').value === ADMIN_PWD) {
-    adminUnlocked = true; adminKey = SERVER_KEY;
-    sessionStorage.setItem('admin_ok','1'); applyAdminUnlock(); loadAdmin();
+
+async function unlockAdmin() {
+  const username = document.getElementById('admin-user').value.trim();
+  const password = document.getElementById('admin-pwd').value;
+  const { data } = await doLogin(username, password);
+  if (data.ok && data.role === 'admin') {
+    currentRole = 'admin';
+    document.getElementById('admin-pwd').value = '';
+    applyAdminUnlock();
+    loadAdmin();
   } else {
     document.getElementById('admin-lock-err').style.display = 'block';
     document.getElementById('admin-pwd').value = '';
   }
 }
 function applyAdminUnlock() {
-  adminKey = SERVER_KEY;
   document.getElementById('admin-lock').style.display = 'none';
   document.getElementById('admin-tool').style.display = 'block';
+}
+
+async function logout(which) {
+  try {
+    await fetch(`${BASE}/logout`, {
+      method: 'POST',
+      headers: { 'x-csrf-token': csrfToken },
+      credentials: 'include',
+    });
+  } catch (e) {}
+  currentRole = null;
+  location.reload();
 }
 
 // ── MEMBER ──
@@ -494,9 +545,11 @@ async function staffRedeem() {
   if (!amount||amount<1) { showToast('Enter a valid order amount.'); return; }
   try {
     const r = await fetch(`${BASE}/vouchers/redeem`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'application/json','x-csrf-token':csrfToken},
+      credentials:'include',
       body: JSON.stringify({ code, branch, amount })
     });
+    if (r.status === 401 || r.status === 403) { showToast('Your session expired — please log in again.'); location.reload(); return; }
     const d = await r.json();
     if (d.ok) {
       res.className='result ok'; res.style.display='block';
@@ -521,10 +574,10 @@ async function staffRedeem() {
 
 // ── ADMIN ──
 async function loadAdmin() {
-  if (!adminKey) return;
+  if (currentRole !== 'admin') return;
   try {
-    const r = await fetch(`${BASE}/vouchers/summary`, { headers:{'x-admin-key':adminKey} });
-    if (r.status===403) { showToast('Admin key mismatch.'); return; }
+    const r = await fetch(`${BASE}/vouchers/summary`, { credentials:'include' });
+    if (r.status===401 || r.status===403) { showToast('Your session expired — please log in again.'); location.reload(); return; }
     const d = await r.json();
     adminLog    = d.log || [];
     allSummary  = d.summary || {};
@@ -606,9 +659,11 @@ async function createTier() {
 
   try {
     const r = await fetch(`${BASE}/vouchers/tiers`, {
-      method:'POST', headers:{'Content-Type':'application/json','x-admin-key':adminKey},
+      method:'POST', headers:{'Content-Type':'application/json','x-csrf-token':csrfToken},
+      credentials:'include',
       body: JSON.stringify({ prefix, discount, minOrder, limit })
     });
+    if (r.status === 401 || r.status === 403) { showToast('Your session expired — please log in again.'); location.reload(); return; }
     const d = await r.json();
     if (d.ok) {
       msg.style.display='block';
@@ -624,12 +679,14 @@ async function createTier() {
 }
 
 async function generateBatch(tier) {
-  if (!adminKey) return;
+  if (currentRole !== 'admin') return;
   try {
     const r = await fetch(`${BASE}/vouchers/generate`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ tier, adminKey })
+      method:'POST', headers:{'Content-Type':'application/json','x-csrf-token':csrfToken},
+      credentials:'include',
+      body: JSON.stringify({ tier })
     });
+    if (r.status === 401 || r.status === 403) { showToast('Your session expired — please log in again.'); location.reload(); return; }
     const d = await r.json();
     if (d.ok && d.created>0) {
       showToast(`✓ ${d.created} codes generated`);
@@ -642,14 +699,15 @@ async function generateBatch(tier) {
 }
 
   async function removeTier(tier) {
-    if (!adminKey) return;
+    if (currentRole !== 'admin') return;
     const t = allSummary[tier];
     const label = t ? `${t.label} (${t.prefix||''})` : tier;
     if (!confirm(`Remove "${label}"? This deletes the batch and all its codes.`)) return;
     try {
       const r = await fetch(`${BASE}/vouchers/tiers/${encodeURIComponent(tier)}`, {
-        method:'DELETE', headers:{'x-admin-key':adminKey}
+        method:'DELETE', headers:{'x-csrf-token':csrfToken}, credentials:'include'
       });
+      if (r.status === 401 || r.status === 403) { showToast('Your session expired — please log in again.'); location.reload(); return; }
       const d = await r.json();
       if (d.ok) { showToast('Batch removed'); loadAdmin(); }
       else { showToast(d.reason||'Could not remove batch.'); }
@@ -657,9 +715,10 @@ async function generateBatch(tier) {
   }
 
 async function loadCodes() {
-    if (!adminKey) return;
+    if (currentRole !== 'admin') return;
     try {
-          const r = await fetch(`${BASE}/vouchers/list`, { headers:{'x-admin-key':adminKey} });
+          const r = await fetch(`${BASE}/vouchers/list`, { credentials:'include' });
+          if (r.status === 401 || r.status === 403) return;
           const d = await r.json();
           allCodes = d.vouchers || [];
           renderCodesTable(allCodes);

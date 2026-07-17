@@ -1,21 +1,38 @@
 // ─────────────────────────────────────────────────────────────
 // server.js — Morgen Coffee Group Voucher System
 // ─────────────────────────────────────────────────────────────
+require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
 const fs      = require('fs');
+const bcrypt  = require('bcryptjs');
+const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
+const { readSession, requireRole, signSession, setSessionCookie, clearSessionCookie } = require('./auth');
+const { issueCsrfToken, verifyCsrf } = require('./csrf');
+
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET is not set. Set it in your environment before starting the server.');
+  process.exit(1);
+}
+
 const app  = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors());
+app.set('trust proxy', 1); // Render sits behind a proxy; needed for correct req.ip and secure cookies
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
+app.use(readSession);
+app.use(issueCsrfToken);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── STORE ────────────────────────────────────────────────────
 const store = {
     vouchers: {},   // code -> { tier, prefix, discount, minOrder, status, branch, date, time, amount }
     tiers: {},      // tierKey -> { prefix, discount, minOrder, limit, label }
-    log: []
+    log: [],
+    users: {}       // username -> { passwordHash, role: 'staff'|'admin' }
 };
 
 // ── PERSISTENCE ─────────────────────────────────────────────
@@ -32,6 +49,7 @@ function loadStore() {
                   store.vouchers = raw.vouchers || {};
                   store.tiers    = raw.tiers    || {};
                   store.log      = raw.log      || [];
+                  store.users    = raw.users    || {};
                   return true;
           }
     } catch (err) {
@@ -55,9 +73,6 @@ if (!loadedExisting) {
     saveStore();
 }
 
-// ── ADMIN KEY ────────────────────────────────────────────────
-const ADMIN_KEY = process.env.VOUCHER_ADMIN_KEY || 'morgen-admin-2026';
-
 // ── HELPERS ──────────────────────────────────────────────────
 function randomCode(length = 5) {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -80,11 +95,46 @@ function nowPH() {
     const time = now.toLocaleTimeString('en-PH', { ...opts, hour: '2-digit', minute: '2-digit' });
     return { date, time };
 }
-function authAdmin(req, res) {
-    const key = req.headers['x-admin-key'] || req.body?.adminKey || req.query?.adminKey;
-    if (key !== ADMIN_KEY) { res.status(403).json({ ok: false, reason: 'unauthorized' }); return false; }
-    return true;
-}
+// ── AUTH ROUTES ──────────────────────────────────────────────
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { ok: false, reason: 'too_many_attempts' },
+});
+
+// Client fetches this once on page load and sends the token back as
+// the x-csrf-token header on every state-changing request.
+app.get('/csrf', (req, res) => res.json({ csrfToken: req.csrfToken }));
+
+app.post('/login', loginLimiter, verifyCsrf, (req, res) => {
+    const { username, password } = req.body || {};
+    const user = store.users[username];
+    const valid = user && bcrypt.compareSync(password || '', user.passwordHash);
+
+    if (!valid) {
+        store.log.unshift({ type: 'login_failed', username: username || '(blank)', ip: req.ip, at: nowPH() });
+        saveStore();
+        return res.status(401).json({ ok: false, reason: 'invalid_credentials' });
+    }
+
+    const token = signSession({ username, role: user.role });
+    setSessionCookie(res, token);
+    res.json({ ok: true, username, role: user.role });
+});
+
+app.post('/logout', verifyCsrf, (req, res) => {
+    clearSessionCookie(res);
+    res.json({ ok: true });
+});
+
+// Lets the front-end check for an existing valid session on page load,
+// so staff/admin don't need to re-enter a password every reload.
+app.get('/me', (req, res) => {
+    if (!req.user) return res.json({ ok: false });
+    res.json({ ok: true, username: req.user.sub, role: req.user.role });
+});
 
 // ── ROUTES ───────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ ok: true, service: 'morgen-vouchers' }));
@@ -108,7 +158,7 @@ app.get('/vouchers/check/:code', (req, res) => {
 });
 
 // Staff: redeem
-app.post('/vouchers/redeem', (req, res) => {
+app.post('/vouchers/redeem', requireRole('staff'), verifyCsrf, (req, res) => {
     const code   = (req.body.code   || '').toUpperCase().trim();
     const branch = (req.body.branch || '').trim();
     const amount =  parseFloat(req.body.amount);
@@ -131,8 +181,7 @@ app.post('/vouchers/redeem', (req, res) => {
 });
 
 // Admin: add a new tier / voucher batch
-app.post('/vouchers/tiers', (req, res) => {
-    if (!authAdmin(req, res)) return;
+app.post('/vouchers/tiers', requireRole('admin'), verifyCsrf, (req, res) => {
     const { prefix, discount, minOrder, limit } = req.body;
     if (!prefix || !discount || !minOrder || !limit)
           return res.status(400).json({ ok: false, reason: 'missing_fields' });
@@ -151,8 +200,7 @@ app.post('/vouchers/tiers', (req, res) => {
 });
 
 // Admin: delete a tier and its vouchers
-app.delete('/vouchers/tiers/:tierKey', (req, res) => {
-    if (!authAdmin(req, res)) return;
+app.delete('/vouchers/tiers/:tierKey', requireRole('admin'), verifyCsrf, (req, res) => {
     const { tierKey } = req.params;
     if (!store.tiers[tierKey]) return res.status(404).json({ ok: false, reason: 'tier_not_found' });
     delete store.tiers[tierKey];
@@ -164,8 +212,7 @@ app.delete('/vouchers/tiers/:tierKey', (req, res) => {
 });
 
 // Admin: generate batch for a tier
-app.post('/vouchers/generate', (req, res) => {
-    if (!authAdmin(req, res)) return;
+app.post('/vouchers/generate', requireRole('admin'), verifyCsrf, (req, res) => {
     const { tier } = req.body;
     if (!store.tiers[tier]) return res.status(400).json({ ok: false, reason: 'invalid_tier' });
     const t        = store.tiers[tier];
@@ -187,14 +234,12 @@ app.post('/vouchers/generate', (req, res) => {
 });
 
 // Admin: get all tiers
-app.get('/vouchers/tiers', (req, res) => {
-    if (!authAdmin(req, res)) return;
+app.get('/vouchers/tiers', requireRole('admin'), (req, res) => {
     res.json({ ok: true, tiers: store.tiers });
 });
 
 // Admin: list all voucher codes (optional ?tier=KEY or ?status=unused|used filters)
-app.get('/vouchers/list', (req, res) => {
-    if (!authAdmin(req, res)) return;
+app.get('/vouchers/list', requireRole('admin'), (req, res) => {
     const { tier, status } = req.query;
     let codes = Object.entries(store.vouchers).map(([code, v]) => ({ code, ...v }));
     if (tier)   codes = codes.filter(v => v.tier === tier);
@@ -203,8 +248,7 @@ app.get('/vouchers/list', (req, res) => {
 });
 
 // Admin: summary + log
-app.get('/vouchers/summary', (req, res) => {
-    if (!authAdmin(req, res)) return;
+app.get('/vouchers/summary', requireRole('admin'), (req, res) => {
     const summary = {};
     for (const [key, t] of Object.entries(store.tiers)) {
           const all  = Object.values(store.vouchers).filter(v => v.tier === key);

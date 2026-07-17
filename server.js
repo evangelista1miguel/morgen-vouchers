@@ -22,7 +22,8 @@ const store = {
 // NOTE: Render's free-tier disk is ephemeral across deploys (it survives
 // simple restarts/sleep, but a new deploy wipes it). For real durability,
 // move this to a proper database (e.g. a free Render Postgres instance).
-const DATA_FILE = path.join(__dirname, 'data.json');
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+const DATA_FILE = path.join(DATA_DIR, 'data.json');
 
 function loadStore() {
     try {
@@ -51,7 +52,6 @@ function saveStore() {
 const loadedExisting = loadStore();
 if (!loadedExisting) {
     store.tiers['50'] = { prefix: 'MCG50-2026', discount: 50,  minOrder: 300, limit: 50,  label: '₱50 off' };
-    store.tiers['20'] = { prefix: 'MCG20-2026', discount: 20,  minOrder: 230, limit: 150, label: '₱20 off' };
     saveStore();
 }
 
@@ -150,6 +150,19 @@ app.post('/vouchers/tiers', (req, res) => {
     res.json({ ok: true, tierKey, tier: store.tiers[tierKey] });
 });
 
+// Admin: delete a tier and its vouchers
+app.delete('/vouchers/tiers/:tierKey', (req, res) => {
+    if (!authAdmin(req, res)) return;
+    const { tierKey } = req.params;
+    if (!store.tiers[tierKey]) return res.status(404).json({ ok: false, reason: 'tier_not_found' });
+    delete store.tiers[tierKey];
+    Object.keys(store.vouchers).forEach(code => {
+        if (store.vouchers[code].tier === tierKey) delete store.vouchers[code];
+    });
+    saveStore();
+    res.json({ ok: true });
+});
+
 // Admin: generate batch for a tier
 app.post('/vouchers/generate', (req, res) => {
     if (!authAdmin(req, res)) return;
@@ -197,7 +210,7 @@ app.get('/vouchers/summary', (req, res) => {
           const all  = Object.values(store.vouchers).filter(v => v.tier === key);
           const used = all.filter(v => v.status === 'used');
           summary[key] = {
-                  tier: key, label: t.label, discount: t.discount, minOrder: t.minOrder,
+                  tier: key, prefix: t.prefix, label: t.label, discount: t.discount, minOrder: t.minOrder,
                   limit: t.limit, issued: all.length, redeemed: used.length,
                   available: all.length - used.length,
                   totalDiscount: used.length * t.discount,

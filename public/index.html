@@ -545,16 +545,19 @@ function renderTiersTable(s) {
   for (const [key, v] of Object.entries(s)) {
     const pct = v.issued>0 ? Math.round(v.redeemed/v.issued*100):0;
     rows += `<tr>
-      <td><strong>${key.startsWith('50')||key.startsWith('20') ? (key==='50'?'MCG50-2026':key==='20'?'MCG20-2026':'') : ''}</strong>
-          <span style="font-size:.7rem;color:var(--muted)">${v.label}</span></td>
+      <td><strong>${v.prefix||''}</strong>
+      <span style="font-size:.7rem;color:var(--muted)">${v.label}</span></td>
       <td><strong>₱${v.discount}</strong></td>
       <td>₱${v.minOrder}</td>
       <td>${v.issued} / ${v.limit}</td>
       <td>${v.redeemed} <span style="color:var(--muted);font-size:.72rem">(${pct}%)</span></td>
       <td style="color:${v.available>0?'var(--green)':'var(--red)'};font-weight:700;">${v.available}</td>
-      <td><button class="btn btn-teal btn-sm" onclick="generateBatch('${key}')">Generate</button></td>
-    </tr>`;
-  }
+      <td style="display:flex;gap:.4rem;">
+      <button class="btn btn-teal btn-sm" onclick="generateBatch('${key}')">Generate</button>
+      <button class="btn btn-ghost btn-sm" onclick="removeTier('${key}')">Remove</button>
+      </td>
+      </tr>`;
+    
   wrap.innerHTML = rows + '</tbody></table>';
 }
 
@@ -621,6 +624,21 @@ async function generateBatch(tier) {
     } else { showToast(d.message||'Batch limit reached.'); }
   } catch(e) { showToast('Connection error.'); }
 }
+
+  async function removeTier(tier) {
+    if (!adminKey) return;
+    const t = allSummary[tier];
+    const label = t ? `${t.label} (${t.prefix||''})` : tier;
+    if (!confirm(`Remove "${label}"? This deletes the batch and all its codes.`)) return;
+    try {
+      const r = await fetch(`${BASE}/vouchers/tiers/${encodeURIComponent(tier)}`, {
+        method:'DELETE', headers:{'x-admin-key':adminKey}
+      });
+      const d = await r.json();
+      if (d.ok) { showToast('Batch removed'); loadAdmin(); }
+      else { showToast(d.reason||'Could not remove batch.'); }
+    } catch(e) { showToast('Connection error.'); }
+  }
 
 function exportCSV() {
   if (!adminLog.length) { showToast('No redemptions to export yet.'); return; }

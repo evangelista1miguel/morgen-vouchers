@@ -60,6 +60,16 @@ function loadStore() {
 
 function saveStore() {
     try {
+          // Never let this process's stale in-memory `users` overwrite
+          // accounts created via scripts/create-user.js after this
+          // server booted — always re-merge the current on-disk users
+          // right before writing anything else back out.
+          try {
+                if (fs.existsSync(DATA_FILE)) {
+                      const onDisk = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+                      store.users = onDisk.users || store.users;
+                }
+          } catch (e) { /* keep in-memory users if the file is mid-write or malformed */ }
           fs.writeFileSync(DATA_FILE, JSON.stringify(store, null, 2));
     } catch (err) {
           console.error('Failed to save data.json:', err);
@@ -110,6 +120,18 @@ app.get('/csrf', (req, res) => res.json({ csrfToken: req.csrfToken }));
 
 app.post('/login', loginLimiter, verifyCsrf, (req, res) => {
     const { username, password } = req.body || {};
+
+    // Accounts are created out-of-band via scripts/create-user.js, which
+    // may run while this server process is already up. Re-read users
+    // from disk here so a newly created account works immediately,
+    // without needing a restart.
+    try {
+        if (fs.existsSync(DATA_FILE)) {
+            const onDisk = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+            store.users = onDisk.users || store.users;
+        }
+    } catch (e) { /* keep in-memory users if the file is mid-write or malformed */ }
+
     const user = store.users[username];
     const valid = user && bcrypt.compareSync(password || '', user.passwordHash);
 

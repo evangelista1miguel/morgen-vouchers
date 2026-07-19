@@ -84,6 +84,47 @@ async function sendVoucherEmail(order) {
   });
 }
 
+function issueVoucher(db, order, paymentId) {
+  let code = newCode();
+  while (db.vouchers[code]) code = newCode();
+  order.status = 'PAID';
+  order.paidAt = new Date().toISOString();
+  order.code = code;
+  order.paymentId = paymentId || null;
+  db.vouchers[code] = {
+    amount: order.amount, balance: order.amount,
+    buyerEmail: order.buyerEmail, recipientName: order.recipientName,
+    reference: order.reference, issuedAt: order.paidAt, redemptions: [],
+  };
+  db.log.unshift({ type: 'issued', code, amount: order.amount, reference: order.reference, at: nowPH() });
+  save(db);
+  sendVoucherEmail(order).catch(err => console.error('gift email failed (code still issued):', err.message));
+  console.log('gift voucher issued:', code, 'for', order.reference);
+  return code;
+}
+
+async function verifyPaidWithMaya(reference) {
+  const res = await fetch(MAYA_BASE + '/payments/v1/payment-rrns/' + encodeURIComponent(reference), {
+    headers: { 'Authorization': 'Basic ' + Buffer.from(process.env.MAYA_SECRET_KEY + ':').toString('base64') },
+  });
+  if (!res.ok) return null;
+  const payments = await res.json().catch(() => null);
+  if (!Array.isArray(payments)) return null;
+  const paid = payments.find(p => p.status === 'PAYMENT_SUCCESS');
+  return paid ? (paid.id || 'verified') : null;
+}
+
+async function reconcileOrder(db, order) {
+  if (!order || order.status === 'PAID') return null;
+  try {
+    const paymentId = await verifyPaidWithMaya(order.reference);
+    if (paymentId) return issueVoucher(db, order, paymentId);
+  } catch (e) {
+    console.error('gift reconcile error for', order.reference, e.message);
+  }
+  return null;
+}
+
 module.exports = function giftVouchers(app) {
 
   // Customer: create Maya checkout
@@ -134,35 +175,36 @@ module.exports = function giftVouchers(app) {
       const evt = req.body || {};
       const reference = evt.requestReferenceNumber;
       const paid = evt.status === 'PAYMENT_SUCCESS' || evt.paymentStatus === 'PAYMENT_SUCCESS';
+      console.log('gift webhook received:', reference || '(no ref)', evt.status || evt.paymentStatus || '(no status)');
       if (!reference || !paid) return;
       const db = load();
       const order = db.orders[reference];
       if (!order || order.status === 'PAID') return;
-
-      let code = newCode();
-      while (db.vouchers[code]) code = newCode();
-      order.status = 'PAID';
-      order.paidAt = new Date().toISOString();
-      order.code = code;
-      order.paymentId = evt.id || evt.paymentId || null;
-      db.vouchers[code] = {
-        amount: order.amount, balance: order.amount,
-        buyerEmail: order.buyerEmail, recipientName: order.recipientName,
-        reference, issuedAt: order.paidAt, redemptions: [],
-      };
-      db.log.unshift({ type: 'issued', code, amount: order.amount, reference, at: nowPH() });
-      save(db);
-      sendVoucherEmail(order).catch(err => console.error('gift email failed (code still issued):', err.message));
+      issueVoucher(db, order, evt.id || evt.paymentId || null);
     } catch (e) {
       console.error('gift/webhook error:', e.message);
     }
   });
 
-  // Customer: poll order status from the thank-you page (reference is unguessable)
-  app.get('/api/gift/status/:reference', (req, res) => {
-    const order = load().orders[req.params.reference];
+  // Customer: poll order status (self-healing: verifies with Maya if still pending)
+  app.get('/api/gift/status/:reference', async (req, res) => {
+    const db = load();
+    const order = db.orders[req.params.reference];
     if (!order) return res.status(404).json({ status: 'NOT_FOUND' });
+    if (order.status !== 'PAID') await reconcileOrder(db, order);
     res.json({ status: order.status, amount: order.amount, code: order.status === 'PAID' ? order.code : null });
+  });
+
+  // Reconcile all pending orders against Maya (safe to call any time)
+  app.get('/api/gift/reconcile', async (req, res) => {
+    const db = load();
+    const pending = Object.values(db.orders).filter(o => o.status !== 'PAID');
+    const issued = [];
+    for (const order of pending) {
+      const code = await reconcileOrder(db, order);
+      if (code) issued.push(order.reference);
+    }
+    res.json({ ok: true, checked: pending.length, issued: issued.length, references: issued });
   });
 
   // Staff: redeem MGV- gift codes through the EXISTING staff tool.

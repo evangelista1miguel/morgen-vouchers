@@ -195,6 +195,21 @@ module.exports = function giftVouchers(app) {
     res.json({ status: order.status, amount: order.amount, code: order.status === 'PAID' ? order.code : null });
   });
 
+  // Resend the voucher email for a paid order (reference acts as the secret)
+  app.get('/api/gift/resend/:reference', async (req, res) => {
+    const db = load();
+    const order = db.orders[req.params.reference];
+    if (!order) return res.status(404).json({ ok: false, reason: 'not_found' });
+    if (order.status !== 'PAID' || !order.code) return res.status(400).json({ ok: false, reason: 'not_paid' });
+    try {
+      await sendVoucherEmail(order);
+      res.json({ ok: true, sentTo: order.buyerEmail });
+    } catch (e) {
+      console.error('gift resend failed:', e.message);
+      res.status(500).json({ ok: false, reason: e.message });
+    }
+  });
+
   // Reconcile all pending orders against Maya (safe to call any time)
   app.get('/api/gift/reconcile', async (req, res) => {
     const db = load();

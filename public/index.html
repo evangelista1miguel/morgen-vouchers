@@ -842,5 +842,35 @@ function showToast(msg){
   }, 1500);
 })();
 </script>
+<script>
+/* gift-member-fix: render MGV- gift vouchers correctly in the Member tab */
+(function(){
+  function fixGift(){
+    var codeEl = document.getElementById('m-code');
+    if (!codeEl) return;
+    var code = (codeEl.value || '').toUpperCase().trim();
+    if (code.indexOf('MGV-') !== 0) return;
+    fetch('/vouchers/check/' + encodeURIComponent(code)).then(function(r){ return r.json(); }).then(function(d){
+      if (!d || d.gift !== true) return;
+      var bal = '\u20B1' + Number(d.balance).toLocaleString();
+      ['m-result', 'vc-member-wrap'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (!el) return;
+        var h = el.innerHTML;
+        if (h.indexOf('undefined') === -1 && !/PARTNER VOUCHER/i.test(h)) return;
+        h = h.replace(/Min\. order \u20B1undefined\.?/g, 'Balance ' + bal + '.');
+        h = h.replace(/\u20B1undefined/g, bal);
+        h = h.replace(/PARTNER VOUCHER/g, 'GIFT VOUCHER').replace(/Partner Voucher/g, 'Gift Voucher');
+        h = h.replace(/AY 2026[\u2013-]2027/g, 'Valid 12 months');
+        h = h.replace(/One redemption per voucher\./g, 'Spend it in one visit or across several.');
+        h = h.replace(/Not combinable with other promos\./g, '');
+        el.innerHTML = h;
+      });
+    }).catch(function(){});
+  }
+  document.addEventListener('click', function(){ setTimeout(fixGift, 500); setTimeout(fixGift, 1200); }, true);
+  document.addEventListener('keydown', function(e){ if (e.key === 'Enter') { setTimeout(fixGift, 500); setTimeout(fixGift, 1200); } }, true);
+})();
+</script>
 </body>
 </html>

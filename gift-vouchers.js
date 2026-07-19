@@ -210,6 +210,23 @@ module.exports = function giftVouchers(app) {
     }
   });
 
+  // Member lookup: MGV- gift codes show balance in the public Member tab.
+  // Registered before the original /vouchers/check route; other codes fall through.
+  app.get('/vouchers/check/:code', (req, res, next) => {
+    const code = req.params.code.toUpperCase().trim();
+    if (!code.startsWith('MGV-')) return next('route');
+    const v = load().vouchers[code];
+    if (!v) return res.json({ valid: false, reason: 'not_found' });
+    const last = v.redemptions[v.redemptions.length - 1] || null;
+    res.json({
+      valid: v.balance > 0, gift: true,
+      status: v.balance > 0 ? 'unused' : 'used',
+      amount: v.amount, balance: v.balance,
+      recipientName: v.recipientName || null,
+      date: last ? last.date : null, branch: last ? last.branch : null,
+    });
+  });
+
   // Reconcile all pending orders against Maya (safe to call any time)
   app.get('/api/gift/reconcile', async (req, res) => {
     const db = load();

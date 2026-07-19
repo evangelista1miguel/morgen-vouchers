@@ -26,6 +26,7 @@ app.use(cookieParser());
 app.use(readSession);
 app.use(issueCsrfToken);
 app.use(express.static(path.join(__dirname, 'public')));
+require('./gift-vouchers')(app); // gift voucher sales via Maya Checkout
 
 // ── STORE ────────────────────────────────────────────────────
 const store = {

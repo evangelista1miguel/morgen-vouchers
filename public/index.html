@@ -771,5 +771,76 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 </script>
+<script>
+/* Gift voucher admin section (self-contained) */
+(function(){
+  var loaded = false;
+  function peso(n){ return '\u20B1' + Number(n).toLocaleString(); }
+  function build(){
+    var host = document.getElementById('admin-tool');
+    if (!host) return;
+    var sec = document.createElement('div');
+    sec.id = 'gift-admin-section';
+    sec.style.cssText = 'margin-top:40px;padding-top:24px;border-top:2px solid #e8e2d8;';
+    sec.innerHTML = '<h2 style="margin:0 0 4px;">Gift voucher sales</h2>'
+      + '<p style="color:#948d84;font-size:14px;margin:0 0 16px;">Vouchers bought online at morgenkaffee.com/vouchers <button id="gift-refresh" style="margin-left:10px;padding:4px 12px;border-radius:8px;border:1px solid #ccc;cursor:pointer;background:#fff;">Refresh</button></p>'
+      + '<div id="gift-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px;"></div>'
+      + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;"><thead><tr id="gift-head"></tr></thead><tbody id="gift-rows"></tbody></table></div>'
+      + '<div id="gift-empty" style="color:#948d84;font-size:14px;padding:14px 0;display:none;">No gift vouchers sold yet.</div>';
+    host.appendChild(sec);
+    ['Code','Amount','Balance','Buyer','Issued','Status',''].forEach(function(h){
+      var th = document.createElement('th');
+      th.textContent = h;
+      th.style.cssText = 'text-align:left;padding:8px 10px;border-bottom:2px solid #e8e2d8;color:#948d84;font-size:12px;letter-spacing:1px;text-transform:uppercase;';
+      document.getElementById('gift-head').appendChild(th);
+    });
+    document.getElementById('gift-refresh').onclick = load;
+  }
+  function stat(label, value){
+    return '<div style="background:#faf7f2;border:1px solid #ece5d8;border-radius:12px;padding:14px;"><div style="font-size:12px;color:#948d84;letter-spacing:1px;text-transform:uppercase;">' + label + '</div><div style="font-size:22px;font-weight:700;margin-top:4px;">' + value + '</div></div>';
+  }
+  function load(){
+    fetch('/api/gift/orders').then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(d){
+      var vouchers = Object.entries(d.vouchers || {});
+      var sold = vouchers.length;
+      var revenue = 0, outstanding = 0, fullyUsed = 0;
+      vouchers.forEach(function(kv){ revenue += kv[1].amount; outstanding += kv[1].balance; if (kv[1].balance <= 0) fullyUsed++; });
+      document.getElementById('gift-stats').innerHTML = stat('Sold', sold) + stat('Revenue', peso(revenue)) + stat('Unspent balance', peso(outstanding)) + stat('Fully used', fullyUsed);
+      var rows = document.getElementById('gift-rows');
+      rows.innerHTML = '';
+      document.getElementById('gift-empty').style.display = sold ? 'none' : 'block';
+      vouchers.sort(function(a,b){ return (b[1].issuedAt||'').localeCompare(a[1].issuedAt||''); });
+      vouchers.forEach(function(kv){
+        var code = kv[0], v = kv[1];
+        var tr = document.createElement('tr');
+        var status = v.balance <= 0 ? '<span style="color:#948d84;">Fully used</span>' : (v.balance < v.amount ? '<span style="color:#b07a1e;">Partial</span>' : '<span style="color:#2e7d4f;">Unused</span>');
+        var cells = ['<strong>' + code + '</strong>', peso(v.amount), peso(v.balance), v.buyerEmail || '', (v.issuedAt||'').slice(0,10), status];
+        cells.forEach(function(c){ var td = document.createElement('td'); td.innerHTML = c; td.style.cssText = 'padding:8px 10px;border-bottom:1px solid #f0ebe2;'; tr.appendChild(td); });
+        var td = document.createElement('td');
+        td.style.cssText = 'padding:8px 10px;border-bottom:1px solid #f0ebe2;';
+        var btn = document.createElement('button');
+        btn.textContent = 'Resend email';
+        btn.style.cssText = 'padding:4px 10px;border-radius:8px;border:1px solid #ccc;cursor:pointer;background:#fff;font-size:12px;';
+        btn.onclick = function(){
+          btn.disabled = true; btn.textContent = 'Sending\u2026';
+          fetch('/api/gift/resend/' + encodeURIComponent(v.reference)).then(function(r){ return r.json(); }).then(function(x){
+            btn.textContent = x.ok ? 'Sent \u2713' : 'Failed';
+            setTimeout(function(){ btn.textContent = 'Resend email'; btn.disabled = false; }, 3000);
+          }).catch(function(){ btn.textContent = 'Failed'; btn.disabled = false; });
+        };
+        td.appendChild(btn);
+        tr.appendChild(td);
+        rows.appendChild(tr);
+      });
+    }).catch(function(){ /* not admin or endpoint unavailable */ });
+  }
+  setInterval(function(){
+    var host = document.getElementById('admin-tool');
+    if (!host || host.offsetParent === null) return;
+    if (!document.getElementById('gift-admin-section')) build();
+    if (!loaded && document.getElementById('gift-admin-section')) { loaded = true; load(); }
+  }, 1500);
+})();
+</script>
 </body>
 </html>
